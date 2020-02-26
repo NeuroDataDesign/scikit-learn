@@ -1595,6 +1595,7 @@ cdef class RandomSparseSplitter(BaseSparseSplitter):
                             else:
                                 self.criterion.children_impurity(&current.impurity_left,
                                                             &current.impurity_right)
+                        # TODO free pred_weights
                         best = current
 
         # Reorganize into samples[start:best.pos] + samples[best.pos:end]

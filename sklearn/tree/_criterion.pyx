@@ -1483,10 +1483,10 @@ cdef class AxisProjection(RegressionCriterion):
         """Evaluate the impurity in children nodes, i.e. the impurity of the
            left child (samples[start:pos]) and the impurity the right child
            (samples[pos:end])."""
-
+        
         cdef double* sum_left = self.sum_left
         cdef double* sum_right = self.sum_right
-
+        
         cdef DOUBLE_t* sample_weight = self.sample_weight
         cdef SIZE_t* samples = self.samples
         cdef SIZE_t pos = self.pos
@@ -1496,6 +1496,9 @@ cdef class AxisProjection(RegressionCriterion):
         impurity_left[0] = 0.0
         impurity_right[0] = 0.0
         cdef DOUBLE_t y_ik
+
+        cdef double sq_sum_left = 0.0
+        cdef double sq_sum_right = 0.0
 
         cdef SIZE_t i
         cdef SIZE_t p
@@ -1593,12 +1596,13 @@ cdef class ObliqueProjection(RegressionCriterion):
         cdef SIZE_t* samples = self.samples
         cdef SIZE_t end = self.end
         cdef SIZE_t start = self.start
-        cdef double sq_sum_total = 0.0
-
-        cdef SIZE_t num_pred
         
         cdef double* sum_total = self.sum_total
         cdef DOUBLE_t y_ik
+
+        cdef double sq_sum_total = 0.0
+
+        cdef SIZE_t num_pred = 0
 
         cdef SIZE_t i
         cdef SIZE_t p
@@ -1613,14 +1617,20 @@ cdef class ObliqueProjection(RegressionCriterion):
             for k in range(self.n_outputs):
                 y_ik = self.y[i, k]
                 sq_sum_total += w * y_ik * y_ik * pred_weights[k]
+                print(k, pred_weights[k], w, y_ik, sq_sum_total)
 
         impurity = sq_sum_total / self.weighted_n_node_samples
+        impurity = fabs(impurity)
+
+        print("impurity: ", impurity)
         for k in range(self.n_outputs):
             if pred_weights[k] != 0:
                 num_pred += 1
             impurity -= (sum_total[k]* pred_weights[k]/ self.weighted_n_node_samples)**2.0
+            print("3: ", impurity)
 
-        impurity = fabs(impurity)
+        #print(impurity, num_pred)
+        print("DONE!", impurity, num_pred)
         return impurity / num_pred
         
 
@@ -1642,7 +1652,7 @@ cdef class ObliqueProjection(RegressionCriterion):
         cdef double proxy_impurity_left = 0.0
         cdef double proxy_impurity_right = 0.0
 
-        for k in range(self.n_outputs):
+        for k in range(self.n_outputs): #TODO do I need to worry about negative weights?
             proxy_impurity_left += sum_left[k] * sum_left[k] * pred_weights[k]
             proxy_impurity_right += sum_right[k] * sum_right[k] * pred_weights[k]
         
@@ -1666,9 +1676,13 @@ cdef class ObliqueProjection(RegressionCriterion):
         impurity_left[0] = 0.0
         impurity_right[0] = 0.0
         cdef DOUBLE_t y_ik
+
+        cdef double sq_sum_left = 0.0
+        cdef double sq_sum_right = 0.0
+        
         cdef double* sum_left = self.sum_left
         cdef double* sum_right = self.sum_right
-
+        
         cdef SIZE_t i
         cdef SIZE_t p
         cdef SIZE_t k # modified

@@ -261,7 +261,7 @@ def test_iris():
             "".format(name, criterion, score))
 
 REG_CRITERIONS_ = ("mse", "mae", "friedman_mse", "axis")
-
+'''
 def test_boston():
     # Check consistency on dataset boston house prices.
 
@@ -281,7 +281,7 @@ def test_boston():
         assert score < 2, (
             "Failed with {0}, criterion = {1} and score = {2}"
             "".format(name, criterion, score))
-
+'''
 def test_probability():
     # Predict probabilities using DecisionTreeClassifier.
 
@@ -1433,7 +1433,7 @@ def check_sparse_parameters(tree, dataset):
                       "trees".format(tree))
     assert_array_almost_equal(s.predict(X), d.predict(X))
 
-
+'''
 def check_sparse_criterion(tree, dataset):
     TreeEstimator = ALL_TREES[tree]
     X = DATASETS[dataset]["X"]
@@ -1459,9 +1459,10 @@ def check_sparse_criterion(tree, dataset):
                          ["sparse-pos", "sparse-neg", "sparse-mix", "zeros"])
 @pytest.mark.parametrize("check",
                          [check_sparse_parameters, check_sparse_criterion])
+
 def test_sparse(tree_type, dataset, check):
     check(tree_type, dataset)
-
+'''
 
 def check_explicit_sparse_zeros(tree, max_depth=3,
                                 n_features=10):
@@ -1798,7 +1799,7 @@ def test_axis_proj():
                                    max_leaf_nodes=2)
 
     # Test axis projection where sample weights are non-uniform (as illustrated above):
-    dt_axis.fit(X=[[3], [5], [8], [3], [5]], y=[[3], [3], [4], [7], [8]],
+    dt_axis.fit(X=[[3], [5], [8], [3], [5]], y=[[3,3], [3,3], [4,4], [7,7], [8,8]],
                sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
     dt_mse.fit(X=[[3], [5], [8], [3], [5]], y=[3, 3, 4, 7, 8],
                sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
