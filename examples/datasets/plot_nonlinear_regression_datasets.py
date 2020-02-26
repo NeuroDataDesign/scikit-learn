@@ -24,9 +24,13 @@ parameter.
 
 import matplotlib.pyplot as plt
 
-from sklearn.datasets import (make_independent_noise, make_log_regression,
-                              make_multiplicative_noise, make_sin_regression,
-                              make_square_regression)
+from sklearn.datasets import (
+    make_independent_noise,
+    make_log_regression,
+    make_multiplicative_noise,
+    make_sin_regression,
+    make_square_regression,
+)
 
 print(__doc__)
 
@@ -62,7 +66,7 @@ simulations = {
 }
 
 _, axs = plt.subplots(1, 5, figsize=(40, 4))
-plt.subplots_adjust(bottom=.15)
+plt.subplots_adjust(bottom=0.15)
 
 for simulation_name, ax in zip(simulations.keys(), axs):
     plot_simulation(simulation_name, ax)
