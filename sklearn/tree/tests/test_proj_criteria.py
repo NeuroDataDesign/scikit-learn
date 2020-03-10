@@ -5,6 +5,8 @@ from sklearn.utils.testing import assert_not_equal
 from sklearn.tree import DecisionTreeRegressor
 import numpy as np
 
+np.random.seed(25)
+
 def test_axis_proj():
     """Check axis projection criterion produces correct results on small toy dataset:
 
@@ -112,14 +114,18 @@ def test_axis_proj():
 
     # Test different random state produces different results
     dt_axis_3 = DecisionTreeRegressor(random_state=1, criterion="axis",
-                                    max_leaf_nodes=3)
-    dt_axis_3.fit(X=[[3], [5], [8], [3], [5]], y=[[3,3], [3,3], [4,4], [7,7], [8,8]],
+                                    max_leaf_nodes=2)
+    dt_axis_3.fit(X=[[3], [5], [8], [3], [5]], y=np.random.randint(1,100,(5,7)),
             sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
-    dt_axis_4 = DecisionTreeRegressor(random_state=3, criterion="axis",
-                                    max_leaf_nodes=3)
-    dt_axis_4.fit(X=[[3], [5], [8], [3], [5]], y=[[3,3], [3,3], [4,4], [7,7], [8,8]],
-            sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
-    assert_not_equal(dt_axis_3.tree_, dt_axis_4.tree_)
+    for i in range(2,100):
+        dt_axis_4 = DecisionTreeRegressor(random_state=i, criterion="axis",
+                                    max_leaf_nodes=2)
+        dt_axis_4.fit(X=[[3], [5], [8], [3], [5]], y=np.random.randint(1,100,(5,7)),
+                sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
+        if False in np.not_equal(dt_axis_3.tree_.impurity, dt_axis_4.tree_.impurity):
+            assert_not_equal(dt_axis_3.tree_.impurity, dt_axis_4.tree_.impurity)
+        elif i==100:
+            assert_not_equal(dt_axis_3.tree_.impurity, dt_axis_4.tree_.impurity)
     
     # Test axis projection where a `sample_weight` is not explicitly provided.
     # This is equivalent to providing uniform sample weights, though
@@ -251,14 +257,18 @@ def test_oblique_proj():
 
     # Test different random state produces different results
     dt_obliq_3 = DecisionTreeRegressor(random_state=1, criterion="oblique",
-                                    max_leaf_nodes=3)
-    dt_obliq_3.fit(X=[[3], [5], [8], [3], [5]], y=[[3,3], [3,3], [4,4], [7,7], [8,8]],
+                                    max_leaf_nodes=2)
+    dt_obliq_3.fit(X=[[3], [5], [8], [3], [5]], y=np.random.randint(1,100,(5,7)),
             sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
-    dt_obliq_4 = DecisionTreeRegressor(random_state=2, criterion="oblique",
-                                    max_leaf_nodes=3)
-    dt_obliq_4.fit(X=[[3], [5], [8], [3], [5]], y=[[3,3], [3,3], [4,4], [7,7], [8,8]],
-            sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
-    assert_not_equal(dt_obliq_3.tree_, dt_obliq_4.tree_)
+    for i in range(2,100):
+        dt_obliq_4 = DecisionTreeRegressor(random_state=i, criterion="oblique",
+                                    max_leaf_nodes=2)
+        dt_obliq_4.fit(X=[[3], [5], [8], [3], [5]], y=np.random.randint(1,100,(5,7)),
+                sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
+        if False in np.not_equal(dt_obliq_3.tree_.impurity, dt_obliq_4.tree_.impurity):
+            assert_not_equal(dt_obliq_3.tree_.impurity, dt_obliq_4.tree_.impurity)
+        elif i==100:
+            assert_not_equal(dt_obliq_3.tree_.impurity, dt_obliq_4.tree_.impurity)
     
     # Test axis projection where all sample weights are uniform:
     dt_obliq.fit(X=[[3], [5], [8], [3], [5]], y=[[3,3], [3,3], [4,4], [7,7], [8,8]],
@@ -267,7 +277,7 @@ def test_oblique_proj():
         assert_allclose(dt_obliq.tree_.impurity, [22.0 / 5.0, 20.75 / 4.0, 0.0 / 1.0], rtol=0.6)
     except:
         try:
-            assert_allclose(dt_obliq.tree_.impurity, [2.0*22.0 / 5.0, 2.0*20.75 / 4.0, 2.0*0.0 / 1.0], rtol=0.6)
+           assert_allclose(dt_obliq.tree_.impurity, [2.0*22.0 / 5.0, 2.0*20.75 / 4.0, 2.0*0.0 / 1.0], rtol=0.6)
         except: 
                 assert_allclose(dt_obliq.tree_.impurity, [0.0, 0.0, 0.0], rtol=0.6)
     
