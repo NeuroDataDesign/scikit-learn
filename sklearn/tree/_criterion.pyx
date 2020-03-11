@@ -1617,20 +1617,15 @@ cdef class ObliqueProjection(RegressionCriterion):
             for k in range(self.n_outputs):
                 y_ik = self.y[i, k]
                 sq_sum_total += w * y_ik * y_ik * pred_weights[k]
-                print(k, pred_weights[k], w, y_ik, sq_sum_total)
 
         impurity = sq_sum_total / self.weighted_n_node_samples
         impurity = fabs(impurity)
 
-        print("impurity: ", impurity)
         for k in range(self.n_outputs):
             if pred_weights[k] != 0:
                 num_pred += 1
             impurity -= (sum_total[k]* pred_weights[k]/ self.weighted_n_node_samples)**2.0
-            print("3: ", impurity)
 
-        #print(impurity, num_pred)
-        print("DONE!", impurity, num_pred)
         return impurity / num_pred
         
 

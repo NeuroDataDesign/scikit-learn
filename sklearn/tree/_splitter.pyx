@@ -79,7 +79,6 @@ cdef inline void _init_pred_weights(SplitRecord* self, SIZE_t n_outputs, UINT32_
 '''
 cdef __dealloc__(SplitRecord* self):
     if not (self.pred_weights):
-        print("freeeee")
         free(self.pred_weights)
 '''
 cdef class Splitter:
@@ -802,11 +801,7 @@ cdef class RandomSplitter(BaseDenseSplitter):
 
                     if current_proxy_improvement > best_proxy_improvement:
                         best_proxy_improvement = current_proxy_improvement
-                        #with gil: 
-                        #    if (isinstance(self.criterion, AxisProjection) or isinstance(self.criterion, ObliqueProjection)):
-                        #        current.pred_weights = best.pred_weights
                         best = current  # copy
-                        #with gil: print(best.pred_weights[0], isinstance(self.criterion, AxisProjection), isinstance(self.criterion, ObliqueProjection))
 
         # Reorganize into samples[start:best.pos] + samples[best.pos:end]
         if best.pos < end:
