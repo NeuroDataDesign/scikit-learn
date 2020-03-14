@@ -1417,26 +1417,6 @@ cdef class AxisProjection(RegressionCriterion):
             impurity -= (sum_total[k]* pred_weights[k]/ self.weighted_n_node_samples)**2.0
 
         return impurity
-        '''
-        for p in range(start, end):
-            i = samples[p]
-            if sample_weight != NULL:
-                w = sample_weight[i]
-            for k in range(self.n_outputs):
-                y_ik = self.y[i, k]
-                # sum over all predictors with pred weights
-                pred[p] += y_ik * pred_weights[k] 
-                # sum over all samples to get mean of new predictor
-                mean_pred += pred[p] / (end - start)
-
-        for p in range(start, end):
-            i = samples[p]
-            if sample_weight != NULL:
-                w = sample_weight[i]
-            impurity += (mean_pred - pred[p]) * (mean_pred - pred[p]) * w
-        impurity /= self.weighted_n_node_samples
-        return impurity
-        '''
         
 
     cdef double proxy_impurity_improvement2(self, double* pred_weights) nogil:
@@ -1465,17 +1445,6 @@ cdef class AxisProjection(RegressionCriterion):
         proxy_impurity_right = fabs(proxy_impurity_right)
         return (proxy_impurity_left / self.weighted_n_left +
                 proxy_impurity_right / self.weighted_n_right)
-        '''
-        with gil:
-            for k in range(self.n_outputs):
-                proxy_impurity_left += sum_left[k] * sum_left[k] * abs(pred_weights[k])
-                proxy_impurity_right += sum_right[k] * sum_right[k] * abs(pred_weights[k])
-        #with gil:
-        #    return (abs(proxy_impurity_left / self.weighted_n_left) +
-        #            abs(proxy_impurity_right / self.weighted_n_right))
-        return (proxy_impurity_left / self.weighted_n_left +
-                proxy_impurity_right / self.weighted_n_right)
-        '''
 
 
     cdef void children_impurity2(self, double* impurity_left,
@@ -1532,47 +1501,6 @@ cdef class AxisProjection(RegressionCriterion):
 
         impurity_left[0] = fabs(impurity_left[0])
         impurity_right[0] = fabs(impurity_right[0])
-        '''
-        for p in range(start, pos):
-            i = samples[p]
-            if sample_weight != NULL:
-                w = sample_weight[i]
-            for k in range(self.n_outputs):
-                y_ik = self.y[i, k]
-                # sum over all predictors with pred weights
-                pred_left[p] += y_ik * pred_weights[k] 
-                # sum over all samples to get mean of new predictor
-                mean_pred_left += pred_left[p] / (pos - start)
-        w = 1.0
-        for p in range(start, pos):
-            i = samples[p]
-            if sample_weight != NULL:
-                w = sample_weight[i]
-            impurity_left[0] += ((mean_pred_left - pred_left[p]) 
-                            * (mean_pred_left - pred_left[p]) * w)/self.weighted_n_left
-        w = 1.0
-        for p in range(pos, end):
-            i = samples[p]
-            if sample_weight != NULL:
-                w = sample_weight[i]
-            for k in range(self.n_outputs):
-                y_ik = self.y[i, k]
-                # sum over all predictors with pred weights
-                pred_right[p - pos] += y_ik * pred_weights[k] 
-                # sum over all samples to get mean of new predictor
-        for p in range(pos, end):
-            mean_pred_right += pred_right[p-pos] / (end - pos)
-
-        w = 1.0
-        for p in range(pos, end):
-            i = samples[p]
-            if sample_weight != NULL:
-                w = sample_weight[i]
-            impurity_right[0] += ((mean_pred_right - pred_right[p - pos]) * (mean_pred_right - pred_right[p-pos]) * w) / self.weighted_n_right
-    
-        impurity_left[0]
-        impurity_right[0]
-        '''
         
         
 
