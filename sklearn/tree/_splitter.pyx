@@ -43,14 +43,42 @@ cdef DTYPE_t FEATURE_THRESHOLD = 1e-7
 # in SparseSplitter
 cdef DTYPE_t EXTRACT_NNZ_SWITCH = 0.1
 
-cdef inline void _init_split(SplitRecord* self, SIZE_t start_pos) nogil:
+cdef inline void _init_split(SplitRecord* self, Criterion criterion, SIZE_t start_pos, SplitRecord* other_split) nogil:
     self.impurity_left = INFINITY
     self.impurity_right = INFINITY
     self.pos = start_pos
     self.feature = 0
     self.threshold = 0.
     self.improvement = -INFINITY
+    with gil: 
+        if isinstance(criterion, ObliqueProjection) or isinstance(criterion, AxisProjection):
+            self.pred_weights = other_split.pred_weights
 
+cdef inline void _init_pred_weights(SplitRecord* self, SIZE_t n_outputs, UINT32_t* random_state, Criterion criterion) nogil:
+    cdef SIZE_t num_pred 
+    cdef SIZE_t a 
+    cdef SIZE_t k
+    #with gil: __dealloc__(self)
+    with gil:
+        if isinstance(criterion, ObliqueProjection):
+            self.pred_weights = <double*> calloc(n_outputs, sizeof(double))
+            num_pred = rand_int(1, n_outputs+1, random_state)
+
+            for i in range(num_pred):
+                k = rand_int(0, n_outputs, random_state)
+                a = rand_int(0, 2, random_state)
+                if a == 0:
+                    a -= 1
+                self.pred_weights[k] = a # didn't normalize
+        elif isinstance(criterion, AxisProjection):
+            self.pred_weights = <double*> calloc(n_outputs, sizeof(double))
+            k = rand_int(0, n_outputs, random_state)
+            self.pred_weights[k] = 1.0
+'''
+cdef __dealloc__(SplitRecord* self):
+    if not (self.pred_weights):
+        free(self.pred_weights)
+'''
 cdef class Splitter:
     """Abstract splitter class.
 
@@ -329,7 +357,10 @@ cdef class BestSplitter(BaseDenseSplitter):
         cdef DTYPE_t current_feature_value
         cdef SIZE_t partition_end
 
-        _init_split(&best, end)
+        _init_split(&best, self.criterion, end, split)
+        _init_split(&current, self.criterion, end, split)
+        #_init_split(&best, self.criterion, end, self.y.shape[1], random_state)
+        #_init_split(&current, self.criterion, end, self.y.shape[1], random_state) #TODO
 
         # Sample up to max_features without replacement using a
         # Fisher-Yates-based algorithm (using the local variables `f_i` and
@@ -435,7 +466,6 @@ cdef class BestSplitter(BaseDenseSplitter):
                                     (current.threshold == INFINITY) or
                                     (current.threshold == -INFINITY)):
                                     current.threshold = Xf[p - 1]
-
                                 best = current  # copy
 
         # Reorganize into samples[start:best.pos] + samples[best.pos:end]
@@ -640,7 +670,10 @@ cdef class RandomSplitter(BaseDenseSplitter):
         cdef DTYPE_t max_feature_value
         cdef DTYPE_t current_feature_value
 
-        _init_split(&best, end)
+        _init_split(&best, self.criterion, end, split)
+        _init_split(&current, self.criterion, end, split)
+        #_init_split(&best, self.criterion, end, self.y.shape[1], random_state)
+        #_init_split(&current, self.criterion, end, self.y.shape[1], random_state) #TODO
 
         # Sample up to max_features without replacement using a
         # Fisher-Yates-based algorithm (using the local variables `f_i` and
@@ -1144,7 +1177,12 @@ cdef class BestSparseSplitter(BaseSparseSplitter):
         cdef UINT32_t* random_state = &self.rand_r_state
 
         cdef SplitRecord best, current
-        _init_split(&best, end)
+
+        _init_split(&best, self.criterion, end, split)
+        _init_split(&current, self.criterion, end, split)
+        #_init_split(&best, self.criterion, end, self.y.shape[1], random_state)
+        #_init_split(&current, self.criterion, end, self.y.shape[1], random_state) #TODO
+
         cdef double current_proxy_improvement = - INFINITY
         cdef double best_proxy_improvement = - INFINITY
 
@@ -1301,7 +1339,8 @@ cdef class BestSparseSplitter(BaseSparseSplitter):
                                     (current.threshold == INFINITY) or
                                     (current.threshold == -INFINITY)):
                                     current.threshold = Xf[p_prev]
-
+                                #if (best.pred_weights):
+                                #    free(best.pred_weights) #TODO
                                 best = current
 
         # Reorganize into samples[start:best.pos] + samples[best.pos:end]
@@ -1373,7 +1412,12 @@ cdef class RandomSparseSplitter(BaseSparseSplitter):
         cdef UINT32_t* random_state = &self.rand_r_state
 
         cdef SplitRecord best, current
-        _init_split(&best, end)
+
+        _init_split(&best, self.criterion, end, split)
+        _init_split(&current, self.criterion, end, split)
+        #_init_split(&best, self.criterion, end, self.y.shape[1], random_state)
+        #_init_split(&current, self.criterion, end, self.y.shape[1], random_state) #TODO
+
         cdef double current_proxy_improvement = - INFINITY
         cdef double best_proxy_improvement = - INFINITY
 
@@ -1526,9 +1570,16 @@ cdef class RandomSparseSplitter(BaseSparseSplitter):
                     if current_proxy_improvement > best_proxy_improvement:
                         best_proxy_improvement = current_proxy_improvement
                         current.improvement = self.criterion.impurity_improvement(impurity)
-
-                        self.criterion.children_impurity(&current.impurity_left,
-                                                         &current.impurity_right)
+                        with gil:
+                            if isinstance(self.criterion, ObliqueProjection) or isinstance(self.criterion, AxisProjection): 
+                                self.criterion.children_impurity2(&current.impurity_left,
+                                                            &current.impurity_right, split.pred_weights)
+                            else:
+                                self.criterion.children_impurity(&current.impurity_left,
+                                                            &current.impurity_right)
+                        # TODO free pred_weights
+                        #if (best.pred_weights):
+                        #    free(best.pred_weights) #TODO
                         best = current
 
         # Reorganize into samples[start:best.pos] + samples[best.pos:end]
