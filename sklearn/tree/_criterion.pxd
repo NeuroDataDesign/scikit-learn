@@ -65,14 +65,11 @@ cdef class Criterion:
     cdef double impurity_improvement(self, double impurity) nogil
     cdef double proxy_impurity_improvement(self) nogil
 
-<<<<<<< HEAD
     cdef double node_impurity2(self, double* pred_weights)
     cdef void children_impurity2(self, double* impurity_left,
                                 double* impurity_right, double* pred_weights)
     cdef double proxy_impurity_improvement2(self, double* pred_weights) nogil
 
-=======
->>>>>>> master
 cdef class ClassificationCriterion(Criterion):
     """Abstract criterion for classification."""
 
@@ -83,4 +80,8 @@ cdef class RegressionCriterion(Criterion):
     """Abstract regression criterion."""
 
     cdef double sq_sum_total
-    cdef object random_state         # Random state for predictor weights (Projection-Based Splitters)
+
+cdef class ObliqueProjection(RegressionCriterion):
+    pass
+cdef class AxisProjection(RegressionCriterion):
+    pass
