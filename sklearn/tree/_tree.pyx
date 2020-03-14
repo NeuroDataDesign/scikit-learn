@@ -204,7 +204,7 @@ cdef class DepthFirstTreeBuilder(TreeBuilder):
 
         # Recursive partition (without actual recursion)
         splitter.init(X, y, sample_weight_ptr, X_idx_sorted)
-
+        
         cdef SIZE_t start
         cdef SIZE_t end
         cdef SIZE_t depth
@@ -256,9 +256,8 @@ cdef class DepthFirstTreeBuilder(TreeBuilder):
                            weighted_n_node_samples < 2 * min_weight_leaf)
 
                 if first:
-                    impurity = splitter.node_impurity()
+                    impurity = splitter.node_impurity(&split)
                     first = 0
-
                 is_leaf = (is_leaf or
                            (impurity <= min_impurity_split))
 
@@ -313,7 +312,6 @@ cdef class DepthFirstTreeBuilder(TreeBuilder):
 cdef inline int _add_to_frontier(PriorityHeapRecord* rec,
                                  PriorityHeap frontier) nogil except -1:
     """Adds record ``rec`` to the priority queue ``frontier``
-
     Returns -1 in case of failure to allocate memory (and raise MemoryError)
     or 0 otherwise.
     """
@@ -324,7 +322,6 @@ cdef inline int _add_to_frontier(PriorityHeapRecord* rec,
 
 cdef class BestFirstTreeBuilder(TreeBuilder):
     """Build a decision tree in best-first fashion.
-
     The best node to expand is given by the node at the frontier that has the
     highest impurity improvement.
     """
@@ -364,7 +361,6 @@ cdef class BestFirstTreeBuilder(TreeBuilder):
 
         # Recursive partition (without actual recursion)
         splitter.init(X, y, sample_weight_ptr, X_idx_sorted)
-
         cdef PriorityHeap frontier = PriorityHeap(INITIAL_STACK_SIZE)
         cdef PriorityHeapRecord record
         cdef PriorityHeapRecord split_node_left
@@ -479,8 +475,9 @@ cdef class BestFirstTreeBuilder(TreeBuilder):
         with gil: _init_pred_weights(&split, splitter.y.shape[1], &(splitter.rand_r_state), splitter.criterion)
 
         if is_first:
-            impurity = splitter.node_impurity()
-
+            impurity = splitter.node_impurity(&split)
+        else:
+            splitter.node_impurity(&split)
         n_node_samples = end - start
         is_leaf = (depth >= self.max_depth or
                    n_node_samples < self.min_samples_split or
@@ -538,54 +535,42 @@ cdef class BestFirstTreeBuilder(TreeBuilder):
 
 cdef class Tree:
     """Array-based representation of a binary decision tree.
-
     The binary tree is represented as a number of parallel arrays. The i-th
     element of each array holds information about the node `i`. Node 0 is the
     tree's root. You can find a detailed description of all arrays in
     `_tree.pxd`. NOTE: Some of the arrays only apply to either leaves or split
     nodes, resp. In this case the values of nodes of the other type are
     arbitrary!
-
     Attributes
     ----------
     node_count : int
         The number of nodes (internal nodes + leaves) in the tree.
-
     capacity : int
         The current capacity (i.e., size) of the arrays, which is at least as
         great as `node_count`.
-
     max_depth : int
         The depth of the tree, i.e. the maximum depth of its leaves.
-
     children_left : array of int, shape [node_count]
         children_left[i] holds the node id of the left child of node i.
         For leaves, children_left[i] == TREE_LEAF. Otherwise,
         children_left[i] > i. This child handles the case where
         X[:, feature[i]] <= threshold[i].
-
     children_right : array of int, shape [node_count]
         children_right[i] holds the node id of the right child of node i.
         For leaves, children_right[i] == TREE_LEAF. Otherwise,
         children_right[i] > i. This child handles the case where
         X[:, feature[i]] > threshold[i].
-
     feature : array of int, shape [node_count]
         feature[i] holds the feature to split on, for the internal node i.
-
     threshold : array of double, shape [node_count]
         threshold[i] holds the threshold for the internal node i.
-
     value : array of double, shape [node_count, n_outputs, max_n_classes]
         Contains the constant prediction value of each node.
-
     impurity : array of double, shape [node_count]
         impurity[i] holds the impurity (i.e., the value of the splitting
         criterion) at node i.
-
     n_node_samples : array of int, shape [node_count]
         n_node_samples[i] holds the number of training samples reaching node i.
-
     weighted_n_node_samples : array of int, shape [node_count]
         weighted_n_node_samples[i] holds the weighted number of training samples
         reaching node i.
@@ -715,7 +700,6 @@ cdef class Tree:
     cdef int _resize(self, SIZE_t capacity) nogil except -1:
         """Resize all inner arrays to `capacity`, if `capacity` == -1, then
            double the size of the inner arrays.
-
         Returns -1 in case of failure to allocate memory (and raise MemoryError)
         or 0 otherwise.
         """
@@ -726,7 +710,6 @@ cdef class Tree:
 
     cdef int _resize_c(self, SIZE_t capacity=SIZE_MAX) nogil except -1:
         """Guts of _resize
-
         Returns -1 in case of failure to allocate memory (and raise MemoryError)
         or 0 otherwise.
         """
@@ -760,9 +743,7 @@ cdef class Tree:
                           SIZE_t n_node_samples,
                           double weighted_n_node_samples) nogil except -1:
         """Add a node to the tree.
-
         The new node registers itself as the child of its parent.
-
         Returns (size_t)(-1) on error.
         """
         cdef SIZE_t node_id = self.node_count
@@ -1121,7 +1102,6 @@ cdef class Tree:
 
     cdef np.ndarray _get_value_ndarray(self):
         """Wraps value as a 3-d NumPy array.
-
         The array keeps a reference to this Tree, which manages the underlying
         memory.
         """
@@ -1137,7 +1117,6 @@ cdef class Tree:
 
     cdef np.ndarray _get_node_ndarray(self):
         """Wraps nodes as a NumPy struct array.
-
         The array keeps a reference to this Tree, which manages the underlying
         memory. Individual fields are publicly accessible as properties of the
         Tree.
@@ -1160,20 +1139,16 @@ cdef class Tree:
                                    int[::1] target_features,
                                    double[::1] out):
         """Partial dependence of the response on the ``target_feature`` set.
-
         For each sample in ``X`` a tree traversal is performed.
         Each traversal starts from the root with weight 1.0.
-
         At each non-leaf node that splits on a target feature, either
         the left child or the right child is visited based on the feature
         value of the current sample, and the weight is not modified.
         At each non-leaf node that splits on a complementary feature,
         both children are visited and the weight is multiplied by the fraction
         of training samples which went to each child.
-
         At each leaf, the value of the node is multiplied by the current
         weight (weights sum to 1 for all visited terminal nodes).
-
         Parameters
         ----------
         X : view on 2d ndarray, shape (n_samples, n_target_features)
@@ -1330,12 +1305,10 @@ cdef _cost_complexity_prune(unsigned char[:] leaves_in_subtree, # OUT
                             Tree orig_tree,
                             _CCPPruneController controller):
     """Perform cost complexity pruning.
-
     This function takes an already grown tree, `orig_tree` and outputs a
     boolean mask `leaves_in_subtree` to are the leaves in the pruned tree. The
     controller signals when the pruning should stop and is passed the
     metrics of the subtrees during the pruning process.
-
     Parameters
     ----------
     leaves_in_subtree : unsigned char[:]
@@ -1511,10 +1484,8 @@ def _build_pruned_tree_ccp(
     DOUBLE_t ccp_alpha):
     """Build a pruned tree from the original tree using cost complexity
     pruning.
-
     The values and nodes from the original tree are copied into the pruned
     tree.
-
     Parameters
     ----------
     tree : Tree
@@ -1542,20 +1513,16 @@ def _build_pruned_tree_ccp(
 
 def ccp_pruning_path(Tree orig_tree):
     """Computes the cost complexity pruning path.
-
     Parameters
     ----------
     tree : Tree
         Original tree.
-
     Returns
     -------
     path_info : dict
         Information about pruning path with attributes:
-
         ccp_alphas : ndarray
             Effective alphas of subtree during pruning.
-
         impurities : ndarray
             Sum of the impurities of the subtree leaves for the
             corresponding alpha value in ``ccp_alphas``.
@@ -1590,10 +1557,8 @@ cdef _build_pruned_tree(
     const unsigned char[:] leaves_in_subtree,
     SIZE_t capacity):
     """Build a pruned tree.
-
     Build a pruned tree from the original tree by transforming the nodes in
     ``leaves_in_subtree`` into leaves.
-
     Parameters
     ----------
     tree : Tree
@@ -1679,3 +1644,4 @@ cdef _build_pruned_tree(
             tree.max_depth = max_depth_seen
     if rc == -1:
         raise MemoryError("pruning tree")
+        

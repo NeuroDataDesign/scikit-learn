@@ -16,9 +16,11 @@
 # License: BSD 3 clause
 
 from ._criterion cimport Criterion
-
+from ._criterion cimport ObliqueProjection
+from ._criterion cimport AxisProjection
 from libc.stdlib cimport free
 from libc.stdlib cimport qsort
+from libc.stdlib cimport calloc
 from libc.string cimport memcpy
 from libc.string cimport memset
 
@@ -81,7 +83,6 @@ cdef __dealloc__(SplitRecord* self):
 '''
 cdef class Splitter:
     """Abstract splitter class.
-
     Splitters are called by tree builders to find the best splits on both
     sparse and dense data, one split at a time.
     """
@@ -94,20 +95,16 @@ cdef class Splitter:
         ----------
         criterion : Criterion
             The criterion to measure the quality of a split.
-
         max_features : SIZE_t
             The maximal number of randomly selected features which can be
             considered for a split.
-
         min_samples_leaf : SIZE_t
             The minimal number of samples each leaf can have, where splits
             which would result in having less samples in a leaf are not
             considered.
-
         min_weight_leaf : double
             The minimal weight each leaf can have, where the weight is the sum
             of the weights of each sample in it.
-
         random_state : object
             The user inputted random state to be used for pseudo-randomness
         """
@@ -147,25 +144,19 @@ cdef class Splitter:
                    DOUBLE_t* sample_weight,
                    np.ndarray X_idx_sorted=None) except -1:
         """Initialize the splitter.
-
         Take in the input data X, the target Y, and optional sample weights.
-
         Returns -1 in case of failure to allocate memory (and raise MemoryError)
         or 0 otherwise.
-
         Parameters
         ----------
         X : object
             This contains the inputs. Usually it is a 2d numpy array.
-
         y : ndarray, dtype=DOUBLE_t
             This is the vector of targets, or true labels, for the samples
-
         sample_weight : DOUBLE_t*
             The weights of the samples, where higher weighted samples are fit
             closer than lower weight samples. If not provided, all samples
             are assumed to have uniform weight.
-
         X_idx_sorted : ndarray, default=None
             The indexes of the sorted training input samples
         """
@@ -215,10 +206,8 @@ cdef class Splitter:
     cdef int node_reset(self, SIZE_t start, SIZE_t end,
                         double* weighted_n_node_samples) nogil except -1:
         """Reset splitter on node samples[start:end].
-
         Returns -1 in case of failure to allocate memory (and raise MemoryError)
         or 0 otherwise.
-
         Parameters
         ----------
         start : SIZE_t
@@ -245,10 +234,8 @@ cdef class Splitter:
     cdef int node_split(self, double impurity, SplitRecord* split,
                         SIZE_t* n_constant_features) nogil except -1:
         """Find the best split on node samples[start:end].
-
         This is a placeholder method. The majority of computation will be done
         here.
-
         It should return -1 upon errors.
         """
 
@@ -259,10 +246,14 @@ cdef class Splitter:
 
         self.criterion.node_value(dest)
 
-    cdef double node_impurity(self) nogil:
+    cdef double node_impurity(self, SplitRecord* split) nogil:
         """Return the impurity of the current node."""
-
-        return self.criterion.node_impurity()
+        with gil:
+            if isinstance(self.criterion, ObliqueProjection) or isinstance(self.criterion, AxisProjection):
+                _init_pred_weights(split, self.y.shape[1], &self.rand_r_state, self.criterion)
+                return self.criterion.node_impurity2(split.pred_weights)
+            else:
+                return self.criterion.node_impurity()
 
 
 cdef class BaseDenseSplitter(Splitter):
@@ -288,7 +279,6 @@ cdef class BaseDenseSplitter(Splitter):
                   DOUBLE_t* sample_weight,
                   np.ndarray X_idx_sorted=None) except -1:
         """Initialize the splitter
-
         Returns -1 in case of failure to allocate memory (and raise MemoryError)
         or 0 otherwise.
         """
@@ -312,7 +302,6 @@ cdef class BestSplitter(BaseDenseSplitter):
     cdef int node_split(self, double impurity, SplitRecord* split,
                         SIZE_t* n_constant_features) nogil except -1:
         """Find the best split on node samples[start:end]
-
         Returns -1 in case of failure to allocate memory (and raise MemoryError)
         or 0 otherwise.
         """
@@ -337,7 +326,7 @@ cdef class BestSplitter(BaseDenseSplitter):
         cdef SplitRecord best, current
         cdef double current_proxy_improvement = -INFINITY
         cdef double best_proxy_improvement = -INFINITY
-
+        
         cdef SIZE_t f_i = n_features
         cdef SIZE_t f_j
         cdef SIZE_t p
@@ -454,8 +443,11 @@ cdef class BestSplitter(BaseDenseSplitter):
                             if ((self.criterion.weighted_n_left < min_weight_leaf) or
                                     (self.criterion.weighted_n_right < min_weight_leaf)):
                                 continue
-
-                            current_proxy_improvement = self.criterion.proxy_impurity_improvement()
+                            with gil:
+                                if isinstance(self.criterion, ObliqueProjection) or isinstance(self.criterion, AxisProjection):
+                                    current_proxy_improvement = self.criterion.proxy_impurity_improvement2(split.pred_weights)
+                                else:
+                                    current_proxy_improvement = self.criterion.proxy_impurity_improvement()
 
                             if current_proxy_improvement > best_proxy_improvement:
                                 best_proxy_improvement = current_proxy_improvement
@@ -466,6 +458,8 @@ cdef class BestSplitter(BaseDenseSplitter):
                                     (current.threshold == INFINITY) or
                                     (current.threshold == -INFINITY)):
                                     current.threshold = Xf[p - 1]
+                                #if (best.pred_weights):
+                                #    free(best.pred_weights) #TODO
                                 best = current  # copy
 
         # Reorganize into samples[start:best.pos] + samples[best.pos:end]
@@ -485,7 +479,12 @@ cdef class BestSplitter(BaseDenseSplitter):
             self.criterion.reset()
             self.criterion.update(best.pos)
             best.improvement = self.criterion.impurity_improvement(impurity)
-            self.criterion.children_impurity(&best.impurity_left,
+            with gil: 
+                if isinstance(self.criterion, ObliqueProjection) or isinstance(self.criterion, AxisProjection):
+                    self.criterion.children_impurity2(&best.impurity_left,
+                                                &best.impurity_right, split.pred_weights)
+                else:
+                    self.criterion.children_impurity(&best.impurity_left,
                                              &best.impurity_right)
 
         # Respect invariant for constant features: the original order of
@@ -630,7 +629,6 @@ cdef class RandomSplitter(BaseDenseSplitter):
     cdef int node_split(self, double impurity, SplitRecord* split,
                         SIZE_t* n_constant_features) nogil except -1:
         """Find the best random split on node samples[start:end]
-
         Returns -1 in case of failure to allocate memory (and raise MemoryError)
         or 0 otherwise.
         """
@@ -776,8 +774,12 @@ cdef class RandomSplitter(BaseDenseSplitter):
                     if ((self.criterion.weighted_n_left < min_weight_leaf) or
                             (self.criterion.weighted_n_right < min_weight_leaf)):
                         continue
-
-                    current_proxy_improvement = self.criterion.proxy_impurity_improvement()
+                    with gil:
+                        if isinstance(self.criterion, ObliqueProjection) or isinstance(self.criterion, AxisProjection):
+                            current_proxy_improvement = self.criterion.proxy_impurity_improvement2(split.pred_weights)
+                        else:
+                            current_proxy_improvement = self.criterion.proxy_impurity_improvement()
+                        
 
                     if current_proxy_improvement > best_proxy_improvement:
                         best_proxy_improvement = current_proxy_improvement
@@ -799,9 +801,13 @@ cdef class RandomSplitter(BaseDenseSplitter):
             self.criterion.reset()
             self.criterion.update(best.pos)
             best.improvement = self.criterion.impurity_improvement(impurity)
-            self.criterion.children_impurity(&best.impurity_left,
-                                             &best.impurity_right)
-
+            with gil:
+                if isinstance(self.criterion, ObliqueProjection) or isinstance(self.criterion, AxisProjection):
+                    self.criterion.children_impurity2(&best.impurity_left,
+                                                &best.impurity_right, split.pred_weights)
+                else:
+                    self.criterion.children_impurity(&best.impurity_left,
+                                                &best.impurity_right)
         # Respect invariant for constant features: the original order of
         # element in features[:n_known_constants] must be preserved for sibling
         # and child nodes
@@ -854,7 +860,6 @@ cdef class BaseSparseSplitter(Splitter):
                   DOUBLE_t* sample_weight,
                   np.ndarray X_idx_sorted=None) except -1:
         """Initialize the splitter
-
         Returns -1 in case of failure to allocate memory (and raise MemoryError)
         or 0 otherwise.
         """
@@ -929,33 +934,26 @@ cdef class BaseSparseSplitter(Splitter):
                                  SIZE_t* end_negative, SIZE_t* start_positive,
                                  bint* is_samples_sorted) nogil:
         """Extract and partition values for a given feature.
-
         The extracted values are partitioned between negative values
         Xf[start:end_negative[0]] and positive values Xf[start_positive[0]:end].
         The samples and index_to_samples are modified according to this
         partition.
-
         The extraction corresponds to the intersection between the arrays
         X_indices[indptr_start:indptr_end] and samples[start:end].
         This is done efficiently using either an index_to_samples based approach
         or binary search based approach.
-
         Parameters
         ----------
         feature : SIZE_t,
             Index of the feature we want to extract non zero value.
-
-
         end_negative, start_positive : SIZE_t*, SIZE_t*,
             Return extracted non zero values in self.samples[start:end] where
             negative values are in self.feature_values[start:end_negative[0]]
             and positive values are in
             self.feature_values[start_positive[0]:end].
-
         is_samples_sorted : bint*,
             If is_samples_sorted, then self.sorted_samples[start:end] will be
             the sorted version of self.samples[start:end].
-
         """
         cdef SIZE_t indptr_start = self.X_indptr[feature],
         cdef SIZE_t indptr_end = self.X_indptr[feature + 1]
@@ -998,7 +996,6 @@ cdef inline void binary_search(INT32_t* sorted_array,
                                SIZE_t value, SIZE_t* index,
                                INT32_t* new_start) nogil:
     """Return the index of value in the sorted array.
-
     If not found, return -1. new_start is the last pivot + 1
     """
     cdef INT32_t pivot
@@ -1030,7 +1027,6 @@ cdef inline void extract_nnz_index_to_samples(INT32_t* X_indices,
                                               SIZE_t* end_negative,
                                               SIZE_t* start_positive) nogil:
     """Extract and partition values for a feature using index_to_samples.
-
     Complexity is O(indptr_end - indptr_start).
     """
     cdef INT32_t k
@@ -1072,10 +1068,8 @@ cdef inline void extract_nnz_binary_search(INT32_t* X_indices,
                                            SIZE_t* sorted_samples,
                                            bint* is_samples_sorted) nogil:
     """Extract and partition values for a given feature using binary search.
-
     If n_samples = end - start and n_indices = indptr_end - indptr_start,
     the complexity is
-
         O((1 - is_samples_sorted[0]) * n_samples * log(n_samples) +
           n_samples * log(n_indices)).
     """
@@ -1151,7 +1145,6 @@ cdef class BestSparseSplitter(BaseSparseSplitter):
     cdef int node_split(self, double impurity, SplitRecord* split,
                         SIZE_t* n_constant_features) nogil except -1:
         """Find the best split on node samples[start:end], using sparse features
-
         Returns -1 in case of failure to allocate memory (and raise MemoryError)
         or 0 otherwise.
         """
@@ -1327,8 +1320,11 @@ cdef class BestSparseSplitter(BaseSparseSplitter):
                             if ((self.criterion.weighted_n_left < min_weight_leaf) or
                                     (self.criterion.weighted_n_right < min_weight_leaf)):
                                 continue
-
-                            current_proxy_improvement = self.criterion.proxy_impurity_improvement()
+                            with gil:
+                                if isinstance(self.criterion, ObliqueProjection) or isinstance(self.criterion, AxisProjection):
+                                    current_proxy_improvement = self.criterion.proxy_impurity_improvement2(split.pred_weights)
+                                else:
+                                    current_proxy_improvement = self.criterion.proxy_impurity_improvement()
 
                             if current_proxy_improvement > best_proxy_improvement:
                                 best_proxy_improvement = current_proxy_improvement
@@ -1354,9 +1350,13 @@ cdef class BestSparseSplitter(BaseSparseSplitter):
             self.criterion.reset()
             self.criterion.update(best.pos)
             best.improvement = self.criterion.impurity_improvement(impurity)
-            self.criterion.children_impurity(&best.impurity_left,
-                                             &best.impurity_right)
-
+            with gil:
+                if isinstance(self.criterion, ObliqueProjection) or isinstance(self.criterion, AxisProjection):
+                    self.criterion.children_impurity2(&best.impurity_left,
+                                                &best.impurity_right, split.pred_weights)
+                else:
+                    self.criterion.children_impurity(&best.impurity_left,
+                                                &best.impurity_right)
         # Respect invariant for constant features: the original order of
         # element in features[:n_known_constants] must be preserved for sibling
         # and child nodes
@@ -1386,7 +1386,6 @@ cdef class RandomSparseSplitter(BaseSparseSplitter):
     cdef int node_split(self, double impurity, SplitRecord* split,
                         SIZE_t* n_constant_features) nogil except -1:
         """Find a random split on node samples[start:end], using sparse features
-
         Returns -1 in case of failure to allocate memory (and raise MemoryError)
         or 0 otherwise.
         """
@@ -1564,8 +1563,11 @@ cdef class RandomSparseSplitter(BaseSparseSplitter):
                     if ((self.criterion.weighted_n_left < min_weight_leaf) or
                             (self.criterion.weighted_n_right < min_weight_leaf)):
                         continue
-
-                    current_proxy_improvement = self.criterion.proxy_impurity_improvement()
+                    with gil:
+                        if isinstance(self.criterion, ObliqueProjection) or isinstance(self.criterion, AxisProjection):
+                            current_proxy_improvement = self.criterion.proxy_impurity_improvement2(split.pred_weights)
+                        else:
+                            current_proxy_improvement = self.criterion.proxy_impurity_improvement()
 
                     if current_proxy_improvement > best_proxy_improvement:
                         best_proxy_improvement = current_proxy_improvement
@@ -1594,8 +1596,13 @@ cdef class RandomSparseSplitter(BaseSparseSplitter):
             self.criterion.reset()
             self.criterion.update(best.pos)
             best.improvement = self.criterion.impurity_improvement(impurity)
-            self.criterion.children_impurity(&best.impurity_left,
-                                             &best.impurity_right)
+            with gil:
+                if isinstance(self.criterion, ObliqueProjection) or isinstance(self.criterion, AxisProjection):
+                    self.criterion.children_impurity2(&best.impurity_left,
+                                                &best.impurity_right, split.pred_weights)
+                else:
+                    self.criterion.children_impurity(&best.impurity_left,
+                                                &best.impurity_right)
 
         # Respect invariant for constant features: the original order of
         # element in features[:n_known_constants] must be preserved for sibling
@@ -1611,3 +1618,4 @@ cdef class RandomSparseSplitter(BaseSparseSplitter):
         split[0] = best
         n_constant_features[0] = n_total_constants
         return 0
+        

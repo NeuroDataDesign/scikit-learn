@@ -1685,7 +1685,6 @@ def test_no_sparse_y_support(name):
 
 def test_mae():
     """Check MAE criterion produces correct results on small toy dataset:
-
     ------------------
     | X | y | weight |
     ------------------
@@ -1697,32 +1696,26 @@ def test_mae():
     ------------------
     |sum wt:|  2.3   |
     ------------------
-
     Because we are dealing with sample weights, we cannot find the median by
     simply choosing/averaging the centre value(s), instead we consider the
     median where 50% of the cumulative weight is found (in a y sorted data set)
     . Therefore with regards to this test data, the cumulative weight is >= 50%
     when y = 4.  Therefore:
     Median = 4
-
     For all the samples, we can get the total error by summing:
     Absolute(Median - y) * weight
-
     I.e., total error = (Absolute(4 - 3) * 0.1)
                       + (Absolute(4 - 3) * 0.3)
                       + (Absolute(4 - 4) * 1.0)
                       + (Absolute(4 - 6) * 0.6)
                       + (Absolute(4 - 7) * 0.3)
                       = 2.5
-
     Impurity = Total error / total weight
              = 2.5 / 2.3
              = 1.08695652173913
              ------------------
-
     From this root node, the next best split is between X values of 3 and 5.
     Thus, we have left and right child nodes:
-
     LEFT                    RIGHT
     ------------------      ------------------
     | X | y | weight |      | X | y | weight |
@@ -1733,25 +1726,21 @@ def test_mae():
     |sum wt:|  0.7   |      ------------------
     ------------------      |sum wt:|  1.6   |
                             ------------------
-
     Impurity is found in the same way:
     Left node Median = 6
     Total error = (Absolute(6 - 3) * 0.1)
                 + (Absolute(6 - 6) * 0.6)
                 = 0.3
-
     Left Impurity = Total error / total weight
             = 0.3 / 0.7
             = 0.428571428571429
             -------------------
-
     Likewise for Right node:
     Right node Median = 4
     Total error = (Absolute(4 - 3) * 0.3)
                 + (Absolute(4 - 4) * 1.0)
                 + (Absolute(4 - 7) * 0.3)
                 = 1.2
-
     Right Impurity = Total error / total weight
             = 1.2 / 1.6
             = 0.75
@@ -1783,7 +1772,6 @@ np.random.seed(25)
 
 def test_axis_proj_jenn():
     """Check axis projection criterion produces correct results on small toy dataset:
-
     ------------------
     | X | y1  y2  | weight |
     ------------------
@@ -1798,10 +1786,8 @@ def test_axis_proj_jenn():
  
     Mean1 = 5
     Mean2 = 5
-
     For all the samples, we can get the total error by summing:
     (Mean1 - y1)^2 * weight or (Mean2 - y2)^2 * weight
-
     I.e., total error = (5 - 3)^2 * 0.1)
                       + (5 - 3)^2 * 0.3)
                       + (5 - 4)^2 * 1.0)
@@ -1809,15 +1795,12 @@ def test_axis_proj_jenn():
                       + (5 - 8)^2 * 0.3)
                       = 0.4 + 1.2 + 1.0 + 2.4 + 2.7
                       = 7.7
-
     Impurity = Total error / total weight
              = 7.7 / 2.3
              = 3.3478260869565
              -----------------
-
     From this root node, the next best split is between X values of 5 and 8.
     Thus, we have left and right child nodes:
-
     LEFT                        RIGHT
     -----------------------     -----------------------
     | X | y1  y2  | weight |    | X | y1  y2  | weight |
@@ -1829,10 +1812,8 @@ def test_axis_proj_jenn():
     -----------------------
     |sum wt:|  1.3         |
     -----------------------
-
     5.0625 + 3.0625 + 5.0625 + 7.5625 / 4  + 0 = 5.1875
     4 + 4.667 = 8.667
-
     Impurity is found in the same way:
     Left node Mean1 = Mean2 = 5.25
     Total error = ((5.25 - 3)^2 * 0.1)
@@ -1840,17 +1821,14 @@ def test_axis_proj_jenn():
                 + ((5.25 - 3)^2 * 0.3)
                 + ((5.25 - 8)^2 * 0.3)
                 = 6.13125
-
     Left Impurity = Total error / total weight
             = 6.13125 / 1.3
             = 4.716346153846154
             -------------------
-
     Likewise for Right node:
     Right node Mean1 = Mean2 = 4
     Total error = ((4 - 4)^2 * 1.0)
                 = 0
-
     Right Impurity = Total error / total weight
             = 0 / 1.0
             = 0.0
@@ -1909,7 +1887,6 @@ def test_axis_proj_jenn():
     
 def test_oblique_proj_jenn():
     """Check oblique projection criterion produces correct results on small toy dataset:
-
     -----------------------
     | X | y1  y2  | weight |
     -----------------------
@@ -1924,10 +1901,8 @@ def test_oblique_proj_jenn():
  
     Mean1 = 5
     Mean_tot = 5
-
     For all the samples, we can get the total error by summing:
     (Mean1 - y1)^2 * weight or (Mean_tot - y)^2 * weight
-
     I.e., error1      = (5 - 3)^2 * 0.1)
                       + (5 - 3)^2 * 0.3)
                       + (5 - 4)^2 * 1.0)
@@ -1936,7 +1911,6 @@ def test_oblique_proj_jenn():
                       = 0.4 + 1.2 + 1.0 + 2.4 + 2.7
                       = 7.7
           error_tot   = 15.4
-
     Impurity = error / total weight
              = 7.7 / 2.3
              = 3.3478260869565
@@ -1947,10 +1921,8 @@ def test_oblique_proj_jenn():
              = 0.0 / 2.3
              = 0.0
              -----------------
-
     From this root node, the next best split is between X values of 5 and 8.
     Thus, we have left and right child nodes:
-
     LEFT                        RIGHT
     -----------------------     -----------------------
     | X | y1  y2  | weight |    | X | y1  y2  | weight |
@@ -1962,10 +1934,8 @@ def test_oblique_proj_jenn():
     -----------------------
     |sum wt:|  1.3         |
     -----------------------
-
     (5.0625 + 3.0625 + 5.0625 + 7.5625) / 4  + 0 = 5.1875
     4 + 4.667 = 8.667
-
     Impurity is found in the same way:
     Left node Mean1 = Mean2 = 5.25
         error1  = ((5.25 - 3)^2 * 0.1)
@@ -1974,7 +1944,6 @@ def test_oblique_proj_jenn():
                 + ((5.25 - 8)^2 * 0.3)
                 = 6.13125
       error_tot = 12.2625
-
     Left Impurity = Total error / total weight
             = 6.13125 / 1.3
             = 4.716346153846154
@@ -1982,12 +1951,10 @@ def test_oblique_proj_jenn():
             = 12.2625 / 1.3
             = 9.43269231
             -------------------
-
     Likewise for Right node:
     Right node Mean1 = Mean2 = 4
     Total error = ((4 - 4)^2 * 1.0)
                 = 0
-
     Right Impurity = Total error / total weight
             = 0 / 1.0
             = 0.0
@@ -2070,7 +2037,6 @@ def test_oblique_proj_jenn():
 def test_axis_proj():
     """Check axis projection criterion produces correct results on 
     small toy dataset:
-
     ------------------
     | X | y1  y2  | weight |
     ------------------
@@ -2358,3 +2324,4 @@ def test_classes_deprecated():
 
     with pytest.warns(DeprecationWarning, match=match):
         assert len(clf.n_classes_) == clf.n_outputs_
+        
