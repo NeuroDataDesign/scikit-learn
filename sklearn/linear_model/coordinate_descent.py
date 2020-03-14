@@ -609,9 +609,9 @@ class ElasticNet(MultiOutputMixin, RegressorMixin, LinearModel):
     Examples
     --------
     >>> from sklearn.linear_model import ElasticNet
-    >>> from sklearn.datasets import make_regression
+    >>> from sklearn.datasets import make_linear_regression
 
-    >>> X, y = make_regression(n_features=2, random_state=0)
+    >>> X, y = make_linear_regression(n_features=2, random_state=0)
     >>> regr = ElasticNet(random_state=0)
     >>> regr.fit(X, y)
     ElasticNet(random_state=0)
@@ -1351,8 +1351,8 @@ class LassoCV(RegressorMixin, LinearModelCV):
     Examples
     --------
     >>> from sklearn.linear_model import LassoCV
-    >>> from sklearn.datasets import make_regression
-    >>> X, y = make_regression(noise=4, random_state=0)
+    >>> from sklearn.datasets import make_linear_regression
+    >>> X, y = make_linear_regression(noise=4, random_state=0)
     >>> reg = LassoCV(cv=5, random_state=0).fit(X, y)
     >>> reg.score(X, y)
     0.9993...
@@ -1526,9 +1526,9 @@ class ElasticNetCV(RegressorMixin, LinearModelCV):
     Examples
     --------
     >>> from sklearn.linear_model import ElasticNetCV
-    >>> from sklearn.datasets import make_regression
+    >>> from sklearn.datasets import make_linear_regression
 
-    >>> X, y = make_regression(n_features=2, random_state=0)
+    >>> X, y = make_linear_regression(n_features=2, random_state=0)
     >>> regr = ElasticNetCV(cv=5, random_state=0)
     >>> regr.fit(X, y)
     ElasticNetCV(cv=5, random_state=0)
@@ -2223,9 +2223,9 @@ class MultiTaskLassoCV(RegressorMixin, LinearModelCV):
     Examples
     --------
     >>> from sklearn.linear_model import MultiTaskLassoCV
-    >>> from sklearn.datasets import make_regression
+    >>> from sklearn.datasets import make_linear_regression
     >>> from sklearn.metrics import r2_score
-    >>> X, y = make_regression(n_targets=2, noise=4, random_state=0)
+    >>> X, y = make_linear_regression(n_targets=2, noise=4, random_state=0)
     >>> reg = MultiTaskLassoCV(cv=5, random_state=0).fit(X, y)
     >>> r2_score(y, reg.predict(X))
     0.9994...

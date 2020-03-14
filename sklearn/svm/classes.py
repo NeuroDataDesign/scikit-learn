@@ -335,8 +335,8 @@ class LinearSVR(RegressorMixin, LinearModel):
     Examples
     --------
     >>> from sklearn.svm import LinearSVR
-    >>> from sklearn.datasets import make_regression
-    >>> X, y = make_regression(n_features=4, random_state=0)
+    >>> from sklearn.datasets import make_linear_regression
+    >>> X, y = make_linear_regression(n_features=4, random_state=0)
     >>> regr = LinearSVR(random_state=0, tol=1e-5)
     >>> regr.fit(X, y)
     LinearSVR(random_state=0, tol=1e-05)

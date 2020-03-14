@@ -17,7 +17,7 @@ n_samples = 1000
 n_outliers = 50
 
 
-X, y, coef = datasets.make_regression(n_samples=n_samples, n_features=1,
+X, y, coef = datasets.make_linear_regression(n_samples=n_samples, n_features=1,
                                       n_informative=1, noise=10,
                                       coef=True, random_state=0)
 

@@ -41,7 +41,7 @@ from sklearn.model_selection._validation import _check_is_permutation
 from sklearn.model_selection._validation import _fit_and_score
 from sklearn.model_selection._validation import _score
 
-from sklearn.datasets import make_regression
+from sklearn.datasets import make_linear_regression
 from sklearn.datasets import load_boston
 from sklearn.datasets import load_iris
 from sklearn.datasets import load_digits
@@ -358,7 +358,7 @@ def test_cross_validate():
     cv = KFold()
 
     # Regression
-    X_reg, y_reg = make_regression(n_samples=30, random_state=0)
+    X_reg, y_reg = make_linear_regression(n_samples=30, random_state=0)
     reg = Ridge(random_state=0)
 
     # Classification
@@ -648,7 +648,7 @@ def test_cross_val_score_with_score_func_classification():
 
 
 def test_cross_val_score_with_score_func_regression():
-    X, y = make_regression(n_samples=30, n_features=20, n_informative=5,
+    X, y = make_linear_regression(n_samples=30, n_features=20, n_informative=5,
                            random_state=0)
     reg = Ridge()
 

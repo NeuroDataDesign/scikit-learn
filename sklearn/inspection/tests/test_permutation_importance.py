@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose
 from sklearn.compose import ColumnTransformer
 from sklearn.datasets import load_boston
 from sklearn.datasets import load_iris
-from sklearn.datasets import make_regression
+from sklearn.datasets import make_linear_regression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LinearRegression
@@ -137,7 +137,7 @@ def test_permutation_importance_mixed_types_pandas():
 
 
 def test_permutation_importance_linear_regresssion():
-    X, y = make_regression(n_samples=500, n_features=10, random_state=0)
+    X, y = make_linear_regression(n_samples=500, n_features=10, random_state=0)
 
     X = scale(X)
     y = scale(y)

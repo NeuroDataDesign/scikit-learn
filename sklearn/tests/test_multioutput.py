@@ -32,7 +32,7 @@ from sklearn.model_selection import GridSearchCV
 
 
 def test_multi_target_regression():
-    X, y = datasets.make_regression(n_targets=3)
+    X, y = datasets.make_linear_regression(n_targets=3)
     X_train, y_train = X[:50], y[:50]
     X_test, y_test = X[50:], y[50:]
 
@@ -52,7 +52,7 @@ def test_multi_target_regression():
 # 0.23. warning about tol not having its correct default value.
 @pytest.mark.filterwarnings('ignore:max_iter and tol parameters have been')
 def test_multi_target_regression_partial_fit():
-    X, y = datasets.make_regression(n_targets=3)
+    X, y = datasets.make_linear_regression(n_targets=3)
     X_train, y_train = X[:50], y[:50]
     X_test, y_test = X[50:], y[50:]
 
@@ -76,13 +76,13 @@ def test_multi_target_regression_partial_fit():
 
 def test_multi_target_regression_one_target():
     # Test multi target regression raises
-    X, y = datasets.make_regression(n_targets=1)
+    X, y = datasets.make_linear_regression(n_targets=1)
     rgr = MultiOutputRegressor(GradientBoostingRegressor(random_state=0))
     assert_raises(ValueError, rgr.fit, X, y)
 
 
 def test_multi_target_sparse_regression():
-    X, y = datasets.make_regression(n_targets=3)
+    X, y = datasets.make_linear_regression(n_targets=3)
     X_train, y_train = X[:50], y[:50]
     X_test = X[50:]
 

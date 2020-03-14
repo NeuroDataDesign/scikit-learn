@@ -204,7 +204,7 @@ cdef class DepthFirstTreeBuilder(TreeBuilder):
 
         # Recursive partition (without actual recursion)
         splitter.init(X, y, sample_weight_ptr, X_idx_sorted)
-        
+
         cdef SIZE_t start
         cdef SIZE_t end
         cdef SIZE_t depth
@@ -256,8 +256,9 @@ cdef class DepthFirstTreeBuilder(TreeBuilder):
                            weighted_n_node_samples < 2 * min_weight_leaf)
 
                 if first:
-                    impurity = splitter.node_impurity(&split)
+                    impurity = splitter.node_impurity()
                     first = 0
+
                 is_leaf = (is_leaf or
                            (impurity <= min_impurity_split))
 
@@ -363,6 +364,7 @@ cdef class BestFirstTreeBuilder(TreeBuilder):
 
         # Recursive partition (without actual recursion)
         splitter.init(X, y, sample_weight_ptr, X_idx_sorted)
+
         cdef PriorityHeap frontier = PriorityHeap(INITIAL_STACK_SIZE)
         cdef PriorityHeapRecord record
         cdef PriorityHeapRecord split_node_left
@@ -477,9 +479,8 @@ cdef class BestFirstTreeBuilder(TreeBuilder):
         with gil: _init_pred_weights(&split, splitter.y.shape[1], &(splitter.rand_r_state), splitter.criterion)
 
         if is_first:
-            impurity = splitter.node_impurity(&split)
-        else:
-            splitter.node_impurity(&split)
+            impurity = splitter.node_impurity()
+
         n_node_samples = end - start
         is_leaf = (depth >= self.max_depth or
                    n_node_samples < self.min_samples_split or

@@ -586,8 +586,8 @@ class OrthogonalMatchingPursuit(MultiOutputMixin, RegressorMixin, LinearModel):
     Examples
     --------
     >>> from sklearn.linear_model import OrthogonalMatchingPursuit
-    >>> from sklearn.datasets import make_regression
-    >>> X, y = make_regression(noise=4, random_state=0)
+    >>> from sklearn.datasets import make_linear_regression
+    >>> X, y = make_linear_regression(noise=4, random_state=0)
     >>> reg = OrthogonalMatchingPursuit().fit(X, y)
     >>> reg.score(X, y)
     0.9991...
@@ -829,8 +829,8 @@ class OrthogonalMatchingPursuitCV(RegressorMixin, LinearModel):
     Examples
     --------
     >>> from sklearn.linear_model import OrthogonalMatchingPursuitCV
-    >>> from sklearn.datasets import make_regression
-    >>> X, y = make_regression(n_features=100, n_informative=10,
+    >>> from sklearn.datasets import make_linear_regression
+    >>> X, y = make_linear_regression(n_features=100, n_informative=10,
     ...                        noise=4, random_state=0)
     >>> reg = OrthogonalMatchingPursuitCV(cv=5).fit(X, y)
     >>> reg.score(X, y)

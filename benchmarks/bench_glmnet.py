@@ -19,7 +19,7 @@ In both cases, only 10% of the features are informative.
 import numpy as np
 import gc
 from time import time
-from sklearn.datasets.samples_generator import make_regression
+from sklearn.datasets.samples_generator import make_linear_regression
 
 alpha = 0.1
 # alpha = 0.01
@@ -62,7 +62,7 @@ if __name__ == '__main__':
         print('Iteration %s of %s' % (i, n))
         print('==================')
 
-        X, Y, coef_ = make_regression(
+        X, Y, coef_ = make_linear_regression(
             n_samples=(i * step) + n_test_samples, n_features=n_features,
             noise=0.1, n_informative=n_informative, coef=True)
 
@@ -102,7 +102,7 @@ if __name__ == '__main__':
         n_features = i * step
         n_informative = n_features / 10
 
-        X, Y, coef_ = make_regression(
+        X, Y, coef_ = make_linear_regression(
             n_samples=(i * step) + n_test_samples, n_features=n_features,
             noise=0.1, n_informative=n_informative, coef=True)
 

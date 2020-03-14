@@ -13,7 +13,7 @@ from time import time
 from scipy import sparse
 from scipy import linalg
 
-from sklearn.datasets.samples_generator import make_regression
+from sklearn.datasets.samples_generator import make_linear_regression
 from sklearn.linear_model import Lasso
 
 
@@ -21,7 +21,7 @@ from sklearn.linear_model import Lasso
 # The two Lasso implementations on Dense data
 print("--- Dense matrices")
 
-X, y = make_regression(n_samples=200, n_features=5000, random_state=0)
+X, y = make_linear_regression(n_samples=200, n_features=5000, random_state=0)
 X_sp = sparse.coo_matrix(X)
 
 alpha = 1

@@ -9,7 +9,7 @@ from sklearn.experimental import enable_hist_gradient_boosting  # noqa
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.datasets import make_classification
-from sklearn.datasets import make_regression
+from sklearn.datasets import make_linear_regression
 from sklearn.ensemble._hist_gradient_boosting.utils import (
     get_equivalent_estimator)
 
@@ -49,7 +49,7 @@ def get_estimator_and_data():
                                    random_state=0)
         return X, y, HistGradientBoostingClassifier
     elif args.problem == 'regression':
-        X, y = make_regression(args.n_samples_max * 2,
+        X, y = make_linear_regression(args.n_samples_max * 2,
                                n_features=args.n_features, random_state=0)
         return X, y, HistGradientBoostingRegressor
 

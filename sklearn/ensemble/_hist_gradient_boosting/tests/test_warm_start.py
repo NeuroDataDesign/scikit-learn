@@ -5,7 +5,7 @@ from numpy.testing import assert_allclose
 import pytest
 
 from sklearn.base import clone
-from sklearn.datasets import make_classification, make_regression
+from sklearn.datasets import make_classification, make_linear_regression
 
 # To use this experimental feature, we need to explicitly ask for it:
 from sklearn.experimental import enable_hist_gradient_boosting  # noqa
@@ -14,7 +14,7 @@ from sklearn.ensemble import HistGradientBoostingClassifier
 
 
 X_classification, y_classification = make_classification(random_state=0)
-X_regression, y_regression = make_regression(random_state=0)
+X_regression, y_regression = make_linear_regression(random_state=0)
 
 
 def _assert_predictor_equal(gb_1, gb_2, X):

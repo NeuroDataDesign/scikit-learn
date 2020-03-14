@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose
-from sklearn.datasets import make_classification, make_regression
+from sklearn.datasets import make_classification, make_linear_regression
 from sklearn.preprocessing import KBinsDiscretizer, MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.base import clone, BaseEstimator, TransformerMixin
@@ -16,7 +16,7 @@ from sklearn.utils import shuffle
 
 
 X_classification, y_classification = make_classification(random_state=0)
-X_regression, y_regression = make_regression(random_state=0)
+X_regression, y_regression = make_linear_regression(random_state=0)
 
 
 @pytest.mark.parametrize('GradientBoosting, X, y', [
@@ -72,7 +72,7 @@ def test_early_stopping_regression(scoring, validation_fraction,
 
     max_iter = 200
 
-    X, y = make_regression(n_samples=50, random_state=0)
+    X, y = make_linear_regression(n_samples=50, random_state=0)
 
     gb = HistGradientBoostingRegressor(
         verbose=1,  # just for coverage
@@ -157,7 +157,7 @@ def test_should_stop(scores, n_iter_no_change, tol, stopping):
 
 def test_least_absolute_deviation():
     # For coverage only.
-    X, y = make_regression(n_samples=500, random_state=0)
+    X, y = make_linear_regression(n_samples=500, random_state=0)
     gbdt = HistGradientBoostingRegressor(loss='least_absolute_deviation',
                                          random_state=0)
     gbdt.fit(X, y)
@@ -226,7 +226,7 @@ def test_missing_values_resilience(problem, missing_proportion,
     n_samples = 1000
     n_features = 2
     if problem == 'regression':
-        X, y = make_regression(n_samples=n_samples, n_features=n_features,
+        X, y = make_linear_regression(n_samples=n_samples, n_features=n_features,
                                n_informative=n_features, random_state=rng)
         gb = HistGradientBoostingRegressor()
         expected_min_score = expected_min_score_regression
@@ -334,7 +334,7 @@ def test_missing_values_minmax_imputation():
 
     def make_missing_value_data(n_samples=int(1e4), seed=0):
         rng = np.random.RandomState(seed)
-        X, y = make_regression(n_samples=n_samples, n_features=4,
+        X, y = make_linear_regression(n_samples=n_samples, n_features=4,
                                random_state=rng)
 
         # Pre-bin the data to ensure a deterministic handling by the 2

@@ -44,13 +44,13 @@ print(__doc__)
 import matplotlib.pyplot as plt
 import numpy as np
 
-from sklearn.datasets import make_regression
+from sklearn.datasets import make_linear_regression
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error
 
 clf = Ridge()
 
-X, y, w = make_regression(n_samples=10, n_features=10, coef=True,
+X, y, w = make_linear_regression(n_samples=10, n_features=10, coef=True,
                           random_state=1, bias=3.5)
 
 coefs = []

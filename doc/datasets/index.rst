@@ -213,7 +213,7 @@ Biclustering
 Generators for regression
 -------------------------
 
-:func:`make_regression` produces regression targets as an optionally-sparse
+:func:`make_linear_regression` produces regression targets as an optionally-sparse
 random linear combination of random features, with noise. Its informative
 features may be uncorrelated, or low rank (few features account for most of the
 variance).

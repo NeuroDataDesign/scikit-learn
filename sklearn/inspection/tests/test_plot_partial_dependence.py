@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose
 
 from sklearn.datasets import load_boston
 from sklearn.datasets import load_iris
-from sklearn.datasets import make_classification, make_regression
+from sklearn.datasets import make_classification, make_linear_regression
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.linear_model import LinearRegression
@@ -276,7 +276,7 @@ def test_plot_partial_dependence_multiclass(pyplot):
     assert any(target_0_data_y != target_1_data_y)
 
 
-multioutput_regression_data = make_regression(n_samples=50, n_targets=2,
+multioutput_regression_data = make_linear_regression(n_samples=50, n_targets=2,
                                               random_state=0)
 
 
@@ -360,7 +360,7 @@ def test_plot_partial_dependence_multiclass_error(pyplot, params, err_msg):
 
 def test_plot_partial_dependence_fig_deprecated(pyplot):
     # Make sure fig object is correctly used if not None
-    X, y = make_regression(n_samples=50, random_state=0)
+    X, y = make_linear_regression(n_samples=50, random_state=0)
     clf = LinearRegression()
     clf.fit(X, y)
 

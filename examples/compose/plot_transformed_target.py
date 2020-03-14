@@ -29,7 +29,7 @@ print(__doc__)
 # Synthetic example
 ###############################################################################
 
-from sklearn.datasets import make_regression
+from sklearn.datasets import make_linear_regression
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import RidgeCV
 from sklearn.compose import TransformedTargetRegressor
@@ -52,7 +52,7 @@ else:
 # (`np.expm1`) will be used to transform the targets before training a linear
 # regression model and using it for prediction.
 
-X, y = make_regression(n_samples=10000, noise=100, random_state=0)
+X, y = make_linear_regression(n_samples=10000, noise=100, random_state=0)
 y = np.exp((y + abs(y.min())) / 200)
 y_trans = np.log1p(y)
 

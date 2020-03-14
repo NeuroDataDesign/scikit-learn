@@ -20,7 +20,7 @@ from sklearn.linear_model.base import _rescale_data
 from sklearn.linear_model.base import make_dataset
 from sklearn.utils import check_random_state
 from sklearn.datasets.samples_generator import make_sparse_uncorrelated
-from sklearn.datasets.samples_generator import make_regression
+from sklearn.datasets.samples_generator import make_linear_regression
 from sklearn.datasets import load_iris
 
 rng = np.random.RandomState(0)
@@ -174,7 +174,7 @@ def test_linear_regression_sparse_equal_dense(normalize, fit_intercept):
 
 def test_linear_regression_multiple_outcome(random_state=0):
     # Test multiple-outcome linear regressions
-    X, y = make_regression(random_state=random_state)
+    X, y = make_linear_regression(random_state=random_state)
 
     Y = np.vstack((y, y)).T
     n_features = X.shape[1]
@@ -338,7 +338,7 @@ def test_sparse_preprocess_data_with_return_mean():
 
 def test_csr_preprocess_data():
     # Test output format of _preprocess_data, when input is csr
-    X, y = make_regression()
+    X, y = make_linear_regression()
     X[X < 2.5] = 0.0
     csr = sparse.csr_matrix(X)
     csr_, y, _, _, _ = _preprocess_data(csr, y, True)
@@ -348,7 +348,7 @@ def test_csr_preprocess_data():
 @pytest.mark.parametrize('is_sparse', (True, False))
 @pytest.mark.parametrize('to_copy', (True, False))
 def test_preprocess_copy_data_no_checks(is_sparse, to_copy):
-    X, y = make_regression()
+    X, y = make_linear_regression()
     X[X < 2.5] = 0.0
 
     if is_sparse:

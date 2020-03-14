@@ -10,7 +10,7 @@ from time import time
 
 from sklearn.linear_model import Ridge, SGDRegressor, ElasticNet
 from sklearn.metrics import mean_squared_error
-from sklearn.datasets.samples_generator import make_regression
+from sklearn.datasets.samples_generator import make_linear_regression
 
 """
 Benchmark for SGD regression
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     asgd_results = np.zeros((len(list_n_samples), len(list_n_features), 2))
     for i, n_train in enumerate(list_n_samples):
         for j, n_features in enumerate(list_n_features):
-            X, y, coef = make_regression(
+            X, y, coef = make_linear_regression(
                 n_samples=n_train + n_test, n_features=n_features,
                 noise=noise, coef=True)
 

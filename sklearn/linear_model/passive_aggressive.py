@@ -363,9 +363,9 @@ class PassiveAggressiveRegressor(BaseSGDRegressor):
     Examples
     --------
     >>> from sklearn.linear_model import PassiveAggressiveRegressor
-    >>> from sklearn.datasets import make_regression
+    >>> from sklearn.datasets import make_linear_regression
 
-    >>> X, y = make_regression(n_features=4, random_state=0)
+    >>> X, y = make_linear_regression(n_features=4, random_state=0)
     >>> regr = PassiveAggressiveRegressor(max_iter=100, random_state=0,
     ... tol=1e-3)
     >>> regr.fit(X, y)

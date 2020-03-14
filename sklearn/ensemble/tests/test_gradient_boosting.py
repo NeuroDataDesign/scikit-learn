@@ -15,7 +15,7 @@ from sklearn import datasets
 from sklearn.base import clone
 from sklearn.base import BaseEstimator
 from sklearn.datasets import (make_classification, fetch_california_housing,
-                              make_regression)
+                              make_linear_regression)
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.ensemble._gradient_boosting import predict_stages
@@ -1314,7 +1314,7 @@ def _make_multiclass():
     "gb, dataset_maker, init_estimator",
     [(GradientBoostingClassifier, make_classification, DummyClassifier),
      (GradientBoostingClassifier, _make_multiclass, DummyClassifier),
-     (GradientBoostingRegressor, make_regression, DummyRegressor)],
+     (GradientBoostingRegressor, make_linear_regression, DummyRegressor)],
     ids=["binary classification", "multiclass classification", "regression"])
 def test_gradient_boosting_with_init(gb, dataset_maker, init_estimator):
     # Check that GradientBoostingRegressor works when init is a sklearn
@@ -1340,7 +1340,7 @@ def test_gradient_boosting_with_init(gb, dataset_maker, init_estimator):
 def test_gradient_boosting_with_init_pipeline():
     # Check that the init estimator can be a pipeline (see issue #13466)
 
-    X, y = make_regression(random_state=0)
+    X, y = make_linear_regression(random_state=0)
     init = make_pipeline(LinearRegression())
     gb = GradientBoostingRegressor(init=init)
     gb.fit(X, y)  # pipeline without sample_weight works fine

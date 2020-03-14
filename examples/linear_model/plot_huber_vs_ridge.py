@@ -20,12 +20,12 @@ print(__doc__)
 import numpy as np
 import matplotlib.pyplot as plt
 
-from sklearn.datasets import make_regression
+from sklearn.datasets import make_linear_regression
 from sklearn.linear_model import HuberRegressor, Ridge
 
 # Generate toy data.
 rng = np.random.RandomState(0)
-X, y = make_regression(n_samples=20, n_features=1, random_state=0, noise=4.0,
+X, y = make_linear_regression(n_samples=20, n_features=1, random_state=0, noise=4.0,
                        bias=100.0)
 
 # Add four strong outliers to the dataset.

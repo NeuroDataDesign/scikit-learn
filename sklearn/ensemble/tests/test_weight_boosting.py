@@ -423,7 +423,7 @@ def test_sparse_regression():
             self.data_type_ = type(X)
             return self
 
-    X, y = datasets.make_regression(n_samples=15, n_features=50, n_targets=1,
+    X, y = datasets.make_linear_regression(n_samples=15, n_features=50, n_targets=1,
                                     random_state=42)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)

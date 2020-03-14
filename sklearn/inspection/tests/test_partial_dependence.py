@@ -22,7 +22,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import MultiTaskLasso
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.datasets import load_iris
-from sklearn.datasets import make_classification, make_regression
+from sklearn.datasets import make_classification, make_linear_regression
 from sklearn.cluster import KMeans
 from sklearn.metrics import r2_score
 from sklearn.pipeline import make_pipeline
@@ -46,8 +46,8 @@ multiclass_classification_data = (make_classification(n_samples=50,
                                                       n_classes=3,
                                                       n_clusters_per_class=1,
                                                       random_state=0), 3)
-regression_data = (make_regression(n_samples=50, random_state=0), 1)
-multioutput_regression_data = (make_regression(n_samples=50, n_targets=2,
+regression_data = (make_linear_regression(n_samples=50, random_state=0), 1)
+multioutput_regression_data = (make_linear_regression(n_samples=50, n_targets=2,
                                                random_state=0), 2)
 
 
@@ -168,7 +168,7 @@ def test_partial_dependence_helpers(est, method, target_feature):
     # This also checks that the brute and recursion methods give the same
     # output.
 
-    X, y = make_regression(random_state=0, n_features=5, n_informative=5)
+    X, y = make_linear_regression(random_state=0, n_features=5, n_informative=5)
     # The 'init' estimator for GBDT (here the average prediction) isn't taken
     # into account with the recursion method, for technical reasons. We set
     # the mean to 0 to that this 'bug' doesn't have any effect.

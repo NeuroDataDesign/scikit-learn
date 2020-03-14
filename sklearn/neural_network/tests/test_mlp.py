@@ -15,7 +15,7 @@ import numpy as np
 from numpy.testing import assert_almost_equal, assert_array_equal
 
 from sklearn.datasets import load_digits, load_boston, load_iris
-from sklearn.datasets import make_regression, make_multilabel_classification
+from sklearn.datasets import make_linear_regression, make_multilabel_classification
 from sklearn.exceptions import ConvergenceWarning
 from io import StringIO
 from sklearn.metrics import roc_auc_score
@@ -348,7 +348,7 @@ def test_multilabel_classification():
 @pytest.mark.filterwarnings('ignore: The default value of multioutput')  # 0.23
 def test_multioutput_regression():
     # Test that multi-output regression works as expected
-    X, y = make_regression(n_samples=200, n_targets=5)
+    X, y = make_linear_regression(n_samples=200, n_targets=5)
     mlp = MLPRegressor(solver='lbfgs', hidden_layer_sizes=50, max_iter=200,
                        random_state=1)
     mlp.fit(X, y)
@@ -541,7 +541,7 @@ def test_predict_proba_multilabel():
 
 def test_shuffle():
     # Test that the shuffle parameter affects the training process (it should)
-    X, y = make_regression(n_samples=50, n_features=5, n_targets=1,
+    X, y = make_linear_regression(n_samples=50, n_features=5, n_targets=1,
                            random_state=0)
 
     # The coefficients will be identical if both do or do not shuffle

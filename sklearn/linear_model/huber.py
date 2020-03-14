@@ -197,9 +197,9 @@ class HuberRegressor(LinearModel, RegressorMixin, BaseEstimator):
     --------
     >>> import numpy as np
     >>> from sklearn.linear_model import HuberRegressor, LinearRegression
-    >>> from sklearn.datasets import make_regression
+    >>> from sklearn.datasets import make_linear_regression
     >>> rng = np.random.RandomState(0)
-    >>> X, y, coef = make_regression(
+    >>> X, y, coef = make_linear_regression(
     ...     n_samples=200, n_features=2, noise=4.0, coef=True, random_state=0)
     >>> X[:4] = rng.uniform(10, 20, (4, 2))
     >>> y[:4] = rng.uniform(10, 20, 4)

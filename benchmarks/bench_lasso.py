@@ -15,7 +15,7 @@ import gc
 from time import time
 import numpy as np
 
-from sklearn.datasets.samples_generator import make_regression
+from sklearn.datasets.samples_generator import make_linear_regression
 
 
 def compute_bench(alpha, n_samples, n_features, precompute):
@@ -32,7 +32,7 @@ def compute_bench(alpha, n_samples, n_features, precompute):
                                           len(n_features))))
             print('==================')
             n_informative = nf // 10
-            X, Y, coef_ = make_regression(n_samples=ns, n_features=nf,
+            X, Y, coef_ = make_linear_regression(n_samples=ns, n_features=nf,
                                           n_informative=n_informative,
                                           noise=0.1, coef=True)
 

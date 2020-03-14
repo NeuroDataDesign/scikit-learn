@@ -212,9 +212,9 @@ class IsotonicRegression(RegressorMixin, TransformerMixin, BaseEstimator):
 
     Examples
     --------
-    >>> from sklearn.datasets import make_regression
+    >>> from sklearn.datasets import make_linear_regression
     >>> from sklearn.isotonic import IsotonicRegression
-    >>> X, y = make_regression(n_samples=10, n_features=1, random_state=41)
+    >>> X, y = make_linear_regression(n_samples=10, n_features=1, random_state=41)
     >>> iso_reg = IsotonicRegression().fit(X.flatten(), y)
     >>> iso_reg.predict([.1, .2])
     array([1.8628..., 3.7256...])

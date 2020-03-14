@@ -17,7 +17,7 @@ from sklearn.utils.testing import assert_warns_message
 from sklearn.utils import safe_mask
 
 from sklearn.datasets.samples_generator import (make_classification,
-                                                make_regression)
+                                                make_linear_regression)
 from sklearn.feature_selection import (
     chi2, f_classif, f_oneway, f_regression, mutual_info_classif,
     mutual_info_regression, SelectPercentile, SelectKBest, SelectFpr,
@@ -75,7 +75,7 @@ def test_f_classif():
 def test_f_regression():
     # Test whether the F test yields meaningful results
     # on a simple simulated regression problem
-    X, y = make_regression(n_samples=200, n_features=20, n_informative=5,
+    X, y = make_linear_regression(n_samples=200, n_features=20, n_informative=5,
                            shuffle=False, random_state=0)
 
     F, pv = f_regression(X, y)
@@ -281,7 +281,7 @@ def test_select_percentile_regression():
     # Test whether the relative univariate feature selection
     # gets the correct items in a simple regression problem
     # with the percentile heuristic
-    X, y = make_regression(n_samples=200, n_features=20,
+    X, y = make_linear_regression(n_samples=200, n_features=20,
                            n_informative=5, shuffle=False, random_state=0)
 
     univariate_filter = SelectPercentile(f_regression, percentile=25)
@@ -305,7 +305,7 @@ def test_select_percentile_regression():
 def test_select_percentile_regression_full():
     # Test whether the relative univariate feature selection
     # selects all features when '100%' is asked.
-    X, y = make_regression(n_samples=200, n_features=20,
+    X, y = make_linear_regression(n_samples=200, n_features=20,
                            n_informative=5, shuffle=False, random_state=0)
 
     univariate_filter = SelectPercentile(f_regression, percentile=100)
@@ -320,7 +320,7 @@ def test_select_percentile_regression_full():
 
 
 def test_invalid_percentile():
-    X, y = make_regression(n_samples=10, n_features=20,
+    X, y = make_linear_regression(n_samples=10, n_features=20,
                            n_informative=2, shuffle=False, random_state=0)
 
     with pytest.raises(ValueError):
@@ -337,7 +337,7 @@ def test_select_kbest_regression():
     # Test whether the relative univariate feature selection
     # gets the correct items in a simple regression problem
     # with the k best heuristic
-    X, y = make_regression(n_samples=200, n_features=20, n_informative=5,
+    X, y = make_linear_regression(n_samples=200, n_features=20, n_informative=5,
                            shuffle=False, random_state=0, noise=10)
 
     univariate_filter = SelectKBest(f_regression, k=5)
@@ -356,7 +356,7 @@ def test_select_heuristics_regression():
     # Test whether the relative univariate feature selection
     # gets the correct items in a simple regression problem
     # with the fpr, fdr or fwe heuristics
-    X, y = make_regression(n_samples=200, n_features=20, n_informative=5,
+    X, y = make_linear_regression(n_samples=200, n_features=20, n_informative=5,
                            shuffle=False, random_state=0, noise=10)
 
     univariate_filter = SelectFpr(f_regression, alpha=0.01)
@@ -411,7 +411,7 @@ def test_boundary_case_ch2():
 def test_select_fdr_regression(alpha, n_informative):
     # Test that fdr heuristic actually has low FDR.
     def single_fdr(alpha, n_informative, random_state):
-        X, y = make_regression(n_samples=150, n_features=20,
+        X, y = make_linear_regression(n_samples=150, n_features=20,
                                n_informative=n_informative, shuffle=False,
                                random_state=random_state, noise=10)
 
@@ -452,7 +452,7 @@ def test_select_fwe_regression():
     # Test whether the relative univariate feature selection
     # gets the correct items in a simple regression problem
     # with the fwe heuristic
-    X, y = make_regression(n_samples=200, n_features=20,
+    X, y = make_linear_regression(n_samples=200, n_features=20,
                            n_informative=5, shuffle=False, random_state=0)
 
     univariate_filter = SelectFwe(f_regression, alpha=0.01)
@@ -643,7 +643,7 @@ def test_mutual_info_classif():
 
 
 def test_mutual_info_regression():
-    X, y = make_regression(n_samples=100, n_features=10, n_informative=2,
+    X, y = make_linear_regression(n_samples=100, n_features=10, n_informative=2,
                            shuffle=False, random_state=0, noise=10)
 
     # Test in KBest mode.

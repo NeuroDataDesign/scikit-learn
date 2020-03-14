@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-from sklearn.datasets.samples_generator import make_regression
+from sklearn.datasets.samples_generator import make_linear_regression
 from sklearn.ensemble.forest import RandomForestRegressor
 from sklearn.linear_model.ridge import Ridge
 from sklearn.linear_model.stochastic_gradient import SGDRegressor
@@ -95,7 +95,7 @@ def generate_dataset(n_train, n_test, n_features, noise=0.1, verbose=False):
     if verbose:
         print("generating dataset...")
 
-    X, y, coef = make_regression(n_samples=n_train + n_test,
+    X, y, coef = make_linear_regression(n_samples=n_train + n_test,
                                  n_features=n_features, noise=noise, coef=True)
 
     random_seed = 13

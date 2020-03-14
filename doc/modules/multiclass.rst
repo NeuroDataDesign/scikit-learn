@@ -340,10 +340,10 @@ take advantage of correlations between targets.
 
 Below is an example of multioutput regression:
 
-  >>> from sklearn.datasets import make_regression
+  >>> from sklearn.datasets import make_linear_regression
   >>> from sklearn.multioutput import MultiOutputRegressor
   >>> from sklearn.ensemble import GradientBoostingRegressor
-  >>> X, y = make_regression(n_samples=10, n_targets=3, random_state=1)
+  >>> X, y = make_linear_regression(n_samples=10, n_targets=3, random_state=1)
   >>> MultiOutputRegressor(GradientBoostingRegressor(random_state=0)).fit(X, y).predict(X)
   array([[-154.75474165, -147.03498585,  -50.03812219],
          [   7.12165031,    5.12914884,  -81.46081961],

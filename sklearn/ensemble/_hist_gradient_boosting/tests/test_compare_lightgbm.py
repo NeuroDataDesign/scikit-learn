@@ -1,6 +1,6 @@
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
-from sklearn.datasets import make_classification, make_regression
+from sklearn.datasets import make_classification, make_linear_regression
 import numpy as np
 import pytest
 
@@ -52,7 +52,7 @@ def test_same_predictions_regression(seed, min_samples_leaf, n_samples,
     max_iter = 1
     max_bins = 255
 
-    X, y = make_regression(n_samples=n_samples, n_features=5,
+    X, y = make_linear_regression(n_samples=n_samples, n_features=5,
                            n_informative=5, random_state=0)
 
     if n_samples > 255:

@@ -1327,8 +1327,8 @@ class LarsCV(Lars):
     Examples
     --------
     >>> from sklearn.linear_model import LarsCV
-    >>> from sklearn.datasets import make_regression
-    >>> X, y = make_regression(n_samples=200, noise=4.0, random_state=0)
+    >>> from sklearn.datasets import make_linear_regression
+    >>> X, y = make_linear_regression(n_samples=200, noise=4.0, random_state=0)
     >>> reg = LarsCV(cv=5).fit(X, y)
     >>> reg.score(X, y)
     0.9996...
@@ -1556,8 +1556,8 @@ class LassoLarsCV(LarsCV):
     Examples
     --------
     >>> from sklearn.linear_model import LassoLarsCV
-    >>> from sklearn.datasets import make_regression
-    >>> X, y = make_regression(noise=4.0, random_state=0)
+    >>> from sklearn.datasets import make_linear_regression
+    >>> X, y = make_linear_regression(noise=4.0, random_state=0)
     >>> reg = LassoLarsCV(cv=5).fit(X, y)
     >>> reg.score(X, y)
     0.9992...

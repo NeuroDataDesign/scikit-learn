@@ -11,7 +11,7 @@ import numpy as np
 
 from sklearn.linear_model import lars_path, lars_path_gram
 from sklearn.linear_model import lasso_path
-from sklearn.datasets.samples_generator import make_regression
+from sklearn.datasets.samples_generator import make_linear_regression
 
 
 def compute_bench(samples_range, features_range):
@@ -37,7 +37,7 @@ def compute_bench(samples_range, features_range):
             }
             print("n_samples: %d" % n_samples)
             print("n_features: %d" % n_features)
-            X, y = make_regression(**dataset_kwargs)
+            X, y = make_linear_regression(**dataset_kwargs)
 
             gc.collect()
             print("benchmarking lars_path (with Gram):", end='')

@@ -33,7 +33,7 @@ from sklearn.linear_model.ridge import _solve_cholesky
 from sklearn.linear_model.ridge import _solve_cholesky_kernel
 from sklearn.linear_model.ridge import _check_gcv_mode
 from sklearn.linear_model.ridge import _X_CenterStackOp
-from sklearn.datasets import make_regression
+from sklearn.datasets import make_linear_regression
 
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import KFold, GroupKFold, cross_val_predict
@@ -370,7 +370,7 @@ def _make_sparse_offset_regression(
         n_samples=100, n_features=100, proportion_nonzero=.5,
         n_informative=10, n_targets=1, bias=13., X_offset=30.,
         noise=30., shuffle=True, coef=False, random_state=None):
-    X, y, c = make_regression(
+    X, y, c = make_linear_regression(
         n_samples=n_samples, n_features=n_features,
         n_informative=n_informative, n_targets=n_targets, bias=bias,
         noise=noise, shuffle=shuffle,
@@ -555,7 +555,7 @@ def test_ridge_gcv_sample_weights(
 
 @pytest.mark.parametrize('mode', [True, 1, 5, 'bad', 'gcv'])
 def test_check_gcv_mode_error(mode):
-    X, y = make_regression(n_samples=5, n_features=2)
+    X, y = make_linear_regression(n_samples=5, n_features=2)
     gcv = RidgeCV(gcv_mode=mode)
     with pytest.raises(ValueError, match="Unknown value for 'gcv_mode'"):
         gcv.fit(X, y)
@@ -573,7 +573,7 @@ def test_check_gcv_mode_error(mode):
 )
 def test_check_gcv_mode_choice(sparse, mode, mode_n_greater_than_p,
                                mode_p_greater_than_n):
-    X, _ = make_regression(n_samples=5, n_features=2)
+    X, _ = make_linear_regression(n_samples=5, n_features=2)
     if sparse:
         X = sp.csr_matrix(X)
     assert _check_gcv_mode(X, mode) == mode_n_greater_than_p
@@ -1241,7 +1241,7 @@ def test_ridge_regression_dtype_stability(solver, seed):
 
 def test_ridge_sag_with_X_fortran():
     # check that Fortran array are converted when using SAG solver
-    X, y = make_regression(random_state=42)
+    X, y = make_linear_regression(random_state=42)
     # for the order of X and y to not be C-ordered arrays
     X = np.asfortranarray(X)
     X = X[::2, :]

@@ -132,11 +132,11 @@ it is also possible to manually iterate over the folds, use different
 data splitting strategies, and use custom scoring functions. Please refer to
 our :ref:`User Guide <cross_validation>` for more details::
 
-  >>> from sklearn.datasets import make_regression
+  >>> from sklearn.datasets import make_linear_regression
   >>> from sklearn.linear_model import LinearRegression
   >>> from sklearn.model_selection import cross_validate
   ...
-  >>> X, y = make_regression(n_samples=1000, random_state=0)
+  >>> X, y = make_linear_regression(n_samples=1000, random_state=0)
   >>> lr = LinearRegression()
   ...
   >>> result = cross_validate(lr, X, y)  # defaults to 5-fold CV

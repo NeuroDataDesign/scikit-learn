@@ -54,7 +54,7 @@ from .import deprecated
 from .validation import has_fit_parameter, _num_samples
 from ..preprocessing import StandardScaler
 from ..datasets import (load_iris, load_boston, make_blobs,
-                        make_multilabel_classification, make_regression)
+                        make_multilabel_classification, make_linear_regression)
 
 
 BOSTON = None
@@ -1564,7 +1564,7 @@ def check_regressor_multioutput(name, estimator):
     if not _is_pairwise_metric(estimator):
         n_samples = n_samples + 1
 
-    X, y = make_regression(random_state=42, n_targets=5,
+    X, y = make_linear_regression(random_state=42, n_targets=5,
                            n_samples=n_samples, n_features=n_features)
     X = pairwise_estimator_convert_X(X, estimator)
 
