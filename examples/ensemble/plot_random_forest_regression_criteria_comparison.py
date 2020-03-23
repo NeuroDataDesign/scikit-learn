@@ -103,21 +103,25 @@ def main(simulation_name, sim_data, n_samples, criterion, n_dimensions, n_iter):
     ----------
     simulation_name : str
         Key from `simulations` dictionary.
-    sim_data: tuple
-        Contains X_train, y_train, X_test, and y_tests
-            X_train : np.array #TODO check this
+    sim_data: tuple (X_train, y_train, X_test, y_test)
+            X_train : array, shape (n_train_samples, n_features)
                 All X training data for given simulation
-            y_train : np.array # TODO
+            y_train : array, shape (n_train_samples, n_outputs)
                 All y training data for given simulation
-            X_test : np.array #TODO check this
+            X_test : array, shape (n_test_samples, n_features)
                 All X testing data for given simulation
-            y_test : np.array # TODO
+            y_test : array, shape (n_test_samples, n_outputs)
                 All y testing data for given simulation
     n_samples : int
         Number of training samples.
-    criterion : string
-        Split criterion used to train forest. Choose from
-        ("mse", "mae", "friedman_mse").
+    criterion : {'mse', 'mae', 'friedman_mse'}
+        Split criterion used to train forest:
+        - 'mse'
+            Mean Squared Error
+        - 'mae'
+            Mean Absolute Error
+        - 'friedman_mse'
+            Friedman Mean Squared Error
     n_dimensions : int
         Number of features and targets to sample.
     n_iter : int
@@ -221,5 +225,4 @@ sns.relplot(
     facet_kws={"sharey": False, "sharex": True},
 )
 plt.tight_layout()
-plt.savefig("splitter_comparison_02_17.png")
 plt.show()
