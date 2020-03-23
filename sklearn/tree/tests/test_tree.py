@@ -1459,7 +1459,6 @@ def check_sparse_criterion(tree, dataset):
                          ["sparse-pos", "sparse-neg", "sparse-mix", "zeros"])
 @pytest.mark.parametrize("check",
                          [check_sparse_parameters, check_sparse_criterion])
-
 def test_sparse(tree_type, dataset, check):
     check(tree_type, dataset)
 
@@ -2053,7 +2052,7 @@ def test_axis_proj():
                                    max_leaf_nodes=2)
 
     # Test axis projection where sample weights are non-uniform (as illustrated above):
-    dt_axis.fit(X=[[3], [5], [8], [3], [5]], y=[[3,3], [3,3], [4,4], [7,7], [8,8]],
+    dt_axis.fit(X=[[3], [5], [8], [3], [5]], y=[[3], [3], [4], [7], [8]],
                sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
     dt_mse.fit(X=[[3], [5], [8], [3], [5]], y=[3, 3, 4, 7, 8],
                sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
