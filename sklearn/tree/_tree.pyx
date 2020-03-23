@@ -39,6 +39,12 @@ from ._utils cimport PriorityHeapRecord
 from ._utils cimport safe_realloc
 from ._utils cimport sizet_ptr_to_ndarray
 
+from ._criterion cimport Criterion
+from ._criterion cimport ObliqueProjection
+from ._criterion cimport AxisProjection
+from libc.stdlib cimport calloc
+from ._utils cimport rand_int
+
 cdef extern from "numpy/arrayobject.h":
     object PyArray_NewFromDescr(PyTypeObject* subtype, np.dtype descr,
                                 int nd, np.npy_intp* dims,
@@ -83,6 +89,28 @@ NODE_DTYPE = np.dtype({
         <Py_ssize_t> &(<Node*> NULL).weighted_n_node_samples
     ]
 })
+
+
+cdef inline void _init_pred_weights(SplitRecord* self, SIZE_t n_outputs, UINT32_t* random_state, Criterion criterion) nogil:
+    cdef SIZE_t num_pred 
+    cdef SIZE_t a 
+    cdef SIZE_t k
+    #with gil: __dealloc__(self)
+    with gil:
+        if isinstance(criterion, ObliqueProjection):
+            self.pred_weights = <double*> calloc(n_outputs, sizeof(double))
+            num_pred = rand_int(1, n_outputs+1, random_state)
+
+            for i in range(num_pred):
+                k = rand_int(0, n_outputs, random_state)
+                a = rand_int(0, 2, random_state)
+                if a == 0:
+                    a -= 1
+                self.pred_weights[k] = a # didn't normalize
+        elif isinstance(criterion, AxisProjection):
+            self.pred_weights = <double*> calloc(n_outputs, sizeof(double))
+            k = rand_int(0, n_outputs, random_state)
+            self.pred_weights[k] = 1.0
 
 # =============================================================================
 # TreeBuilder
@@ -187,6 +215,8 @@ cdef class DepthFirstTreeBuilder(TreeBuilder):
         cdef double weighted_n_node_samples
         cdef SplitRecord split
         cdef SIZE_t node_id
+
+        _init_pred_weights(&split, splitter.y.shape[1], &(splitter.rand_r_state), splitter.criterion)
 
         cdef double impurity = INFINITY
         cdef SIZE_t n_constant_features
@@ -441,6 +471,8 @@ cdef class BestFirstTreeBuilder(TreeBuilder):
         cdef double imp_diff
 
         splitter.node_reset(start, end, &weighted_n_node_samples)
+
+        with gil: _init_pred_weights(&split, splitter.y.shape[1], &(splitter.rand_r_state), splitter.criterion)
 
         if is_first:
             impurity = splitter.node_impurity(&split)

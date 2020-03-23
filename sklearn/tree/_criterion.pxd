@@ -85,3 +85,4 @@ cdef class ObliqueProjection(RegressionCriterion):
     pass
 cdef class AxisProjection(RegressionCriterion):
     pass
+    
