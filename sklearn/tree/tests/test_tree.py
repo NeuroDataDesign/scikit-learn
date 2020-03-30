@@ -20,7 +20,6 @@ from sklearn.metrics import mean_squared_error
 
 from sklearn.utils.testing import assert_allclose
 from sklearn.utils.testing import assert_array_equal
-from sklearn.utils.testing import assert_not_equal
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.utils.testing import assert_almost_equal
 from sklearn.utils.testing import assert_warns
