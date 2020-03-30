@@ -1857,7 +1857,6 @@ def test_axis_proj_same_y():
     assert(abs(dt_mse.tree_.impurity[0] - dt_axis.tree_.impurity[0]) < 0.01)
     assert(abs(dt_mse.tree_.impurity[1] - dt_axis.tree_.impurity[1]) < 0.01) 
     assert(abs(dt_axis.tree_.impurity[2]) < 0.01)
-    assert_allclose(dt_axis.tree_.impurity, [22.0 / 5.0, 20.75 / 4.0, 0.0 / 1.0], rtol=0.6)
 
     # Test axis projections where a `sample_weight` is not explicitly provided.
     # This is equivalent to providing uniform sample weights, though
@@ -1884,7 +1883,7 @@ def test_axis_proj_diff_y():
     ------------------
  
     Mean1 = 5
-    Mean2 = 5
+    Mean2 = 4.4
     For all the samples, we can get the total error by summing:
     (Mean1 - y1)^2 * weight or (Mean2 - y2)^2 * weight
     I.e., total error1 = (5 - 3)^2 * 0.1)
@@ -1894,19 +1893,19 @@ def test_axis_proj_diff_y():
                       + (5 - 8)^2 * 0.3)
                       = 0.4 + 1.2 + 1.0 + 2.4 + 2.7
                       = 7.7
-          total error2 = (5 - 2)^2 * 0.1)
-                      + (5 - 4)^2 * 0.3)
-                      + (5 - 3)^2 * 1.0)
-                      + (5 - 6)^2 * 0.6)
-                      + (5 - 7)^2 * 0.3)
-                      = 0.9 + 0.3 + 4.0 + 0.6 + 1.2
-                      = 7.0            
+          total error2 = (4.4 - 2)^2 * 0.1)
+                      + (4.4 - 4)^2 * 0.3)
+                      + (4.4 - 3)^2 * 1.0)
+                      + (4.4 - 6)^2 * 0.6)
+                      + (4.4 - 7)^2 * 0.3)
+                      = 0.576 + 0.048 + 1.96 + 1.536 + 2.028
+                      = 6.148            
     Impurity1 = Total error1 / total weight
              = 7.7 / 2.3
              = 3.3478260869565
     Impurity2 = Total error2 / total weight
-             = 7.0 / 2.3
-             = 3.043478261
+             = 6.148 / 2.3
+             = 2.673043478
              -----------------
     """
     # Test axis projection where multiple y values are different:
@@ -1914,7 +1913,11 @@ def test_axis_proj_diff_y():
                                    max_leaf_nodes=2)
     dt_axis_multi.fit(X=[[3], [5], [8], [3], [5]], y=[[3,2], [3,4], [4,3], [7,6], [8,7]],
                sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
-    assert_allclose(dt_axis_multi.tree_.impurity, [6.148 / 2.3, 4.818 / 2.3, 0.0], rtol=0.6)
+    try:
+        assert_allclose(dt_axis_multi.tree_.impurity, [6.148 / 2.3, 4.818 / 2.3, 0.0], rtol=0.6)
+    except:
+        assert_allclose(dt_axis_multi.tree_.impurity, [7.7 / 2.3, 6.13125 / 1.3, 0.0 / 1.0], rtol=0.6)
+
 
 def test_axis_proj_weights():
     # Test axis projection where sample weights are non-uniform (as illustrated above):
@@ -1923,6 +1926,12 @@ def test_axis_proj_weights():
     dt_axis.fit(X=[[3], [5], [8], [3], [5]], y=[[3,3], [3,3], [4,4], [7,7], [8,8]],
                sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
     assert_allclose(dt_axis.tree_.impurity, [7.7 / 2.3, 6.13125 / 1.3, 0.0 / 1.0], rtol=0.6)
+    
+    #Test axis projection where sample weights are uniform
+    dt_axis.fit(X=[[3], [5], [8], [3], [5]], y=[[3,3], [3,3], [4,4], [7,7], [8,8]],
+               sample_weight=np.ones(5))
+    assert_allclose(dt_axis.tree_.impurity, [22.0 / 5.0, 20.75 / 4.0, 0.0 / 1.0], rtol=0.6)
+
 
 def test_axis_proj_random_state():
     # Same random state produces same result
@@ -1930,7 +1939,7 @@ def test_axis_proj_random_state():
                                    max_leaf_nodes=2)
     dt_axis.fit(X=[[3], [5], [8], [3], [5]], y=[[3,3], [3,3], [4,4], [7,7], [8,8]],
                sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
-    for i in range(3):
+    for i in range(30):
         dt_axis_2 = DecisionTreeRegressor(random_state=0, criterion="axis",
                                         max_leaf_nodes=2)
         dt_axis_2.fit(X=[[3], [5], [8], [3], [5]], y=[[3,3], [3,3], [4,4], [7,7], [8,8]],
@@ -1938,17 +1947,19 @@ def test_axis_proj_random_state():
         assert_allclose(dt_axis.tree_.impurity, dt_axis_2.tree_.impurity)
     
     # Different random state produces different result
+    y_vals = np.random.randint(1,100,(5,7))
     dt_axis_3 = DecisionTreeRegressor(random_state=1, criterion="axis",
                                     max_leaf_nodes=2)
-    dt_axis_3.fit(X=[[3], [5], [8], [3], [5]], y=np.random.randint(1,100,(5,7)),
+    dt_axis_3.fit(X=[[3], [5], [8], [3], [5]], y=y_vals,
             sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
     for i in range(2,100):
         dt_axis_4 = DecisionTreeRegressor(random_state=i, criterion="axis",
                                     max_leaf_nodes=2)
-        dt_axis_4.fit(X=[[3], [5], [8], [3], [5]], y=np.random.randint(1,100,(5,7)),
+        dt_axis_4.fit(X=[[3], [5], [8], [3], [5]], y=y_vals,
                 sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
         if False in np.not_equal(dt_axis_3.tree_.impurity, dt_axis_4.tree_.impurity):
             assert_not_equal(dt_axis_3.tree_.impurity, dt_axis_4.tree_.impurity)
+            break
         elif i==100:
             assert_not_equal(dt_axis_3.tree_.impurity, dt_axis_4.tree_.impurity)
     
@@ -1968,6 +1979,7 @@ def test_oblique_proj_diff_y():
     -----------------------
  
     Mean1 = 5
+    Mean2 = 4.4
     Mean_tot = 5
     For all the samples, we can get the total error by summing:
     (Mean1 - y1)^2 * weight or (Mean_tot - y)^2 * weight
@@ -1978,20 +1990,23 @@ def test_oblique_proj_diff_y():
                       + (5 - 8)^2 * 0.3)
                       = 0.4 + 1.2 + 1.0 + 2.4 + 2.7
                       = 7.7
-          error2      = (5 - 2)^2 * 0.1)
-                      + (5 - 4)^2 * 0.3)
-                      + (5 - 3)^2 * 1.0)
-                      + (5 - 6)^2 * 0.6)
-                      + (5 - 7)^2 * 0.3)
-                      = 0.9 + 0.3 + 4.0 + 0.6 + 1.2
-                      = 7.0
-          error_tot   = 15.4
+          error2      = (4.4 - 2)^2 * 0.1)
+                      + (4.4 - 4)^2 * 0.3)
+                      + (4.4 - 3)^2 * 1.0)
+                      + (4.4 - 6)^2 * 0.6)
+                      + (4.4 - 7)^2 * 0.3)
+                      = 0.576 + 0.048 + 1.96 + 1.536 + 2.028
+                      = 6.148 
+          error_tot   = 13.848
     Impurity = error / total weight
              = 7.7 / 2.3
              = 3.3478260869565
              or
-             = 15.4 / 2.3
-             = 6.6956521739130
+             = 6.148 / 2.3
+             = 2.673043478
+             or
+             = 13.848 / 2.3
+             = 6.020869565
              or
              = 0.0 / 2.3
              = 0.0
@@ -2059,7 +2074,7 @@ def test_oblique_proj_random_state():
     # Test for the same result with same initial random state 
     dt_obliq = DecisionTreeRegressor(random_state=3, criterion="oblique",
                                    max_leaf_nodes=2)
-    for i in range(3):                         
+    for i in range(30):                         
         dt_obliq_2 = DecisionTreeRegressor(random_state=3, criterion="oblique",
                                         max_leaf_nodes=2)
         dt_obliq_2.fit(X=[[3], [5], [8], [3], [5]], y=[[3,3], [3,3], [4,4], [7,7], [8,8]],
@@ -2067,17 +2082,19 @@ def test_oblique_proj_random_state():
         assert_allclose(dt_obliq.tree_.impurity, dt_obliq_2.tree_.impurity)
 
     # Test different random state produces different results
+    y_vals = np.random.randint(1,100,(5,7))
     dt_obliq_3 = DecisionTreeRegressor(random_state=1, criterion="oblique",
                                     max_leaf_nodes=2)
-    dt_obliq_3.fit(X=[[3], [5], [8], [3], [5]], y=np.random.randint(1,100,(5,7)),
+    dt_obliq_3.fit(X=[[3], [5], [8], [3], [5]], y=y_vals,
             sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
     for i in range(2,100):
         dt_obliq_4 = DecisionTreeRegressor(random_state=i, criterion="oblique",
                                     max_leaf_nodes=2)
-        dt_obliq_4.fit(X=[[3], [5], [8], [3], [5]], y=np.random.randint(1,100,(5,7)),
+        dt_obliq_4.fit(X=[[3], [5], [8], [3], [5]], y=y_vals,
                 sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
         if False in np.not_equal(dt_obliq_3.tree_.impurity, dt_obliq_4.tree_.impurity):
             assert_not_equal(dt_obliq_3.tree_.impurity, dt_obliq_4.tree_.impurity)
+            break
         elif i==100:
             assert_not_equal(dt_obliq_3.tree_.impurity, dt_obliq_4.tree_.impurity)
     
