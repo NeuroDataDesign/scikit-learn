@@ -1958,10 +1958,12 @@ def test_axis_proj_random_state():
         dt_axis_4.fit(X=[[3], [5], [8], [3], [5]], y=y_vals,
                 sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
         if True in np.not_equal(dt_axis_3.tree_.impurity, dt_axis_4.tree_.impurity):
-            assert_not_equal(dt_axis_3.tree_.impurity, dt_axis_4.tree_.impurity).any()
+            #assert_not_equal(dt_axis_3.tree_.impurity, dt_axis_4.tree_.impurity).any()
+            assert(True)
             break
         elif i==100:
-            assert_not_equal(dt_axis_3.tree_.impurity, dt_axis_4.tree_.impurity).any()
+            #assert_not_equal(dt_axis_3.tree_.impurity, dt_axis_4.tree_.impurity).any()
+            assert(False)
     
 
 def test_oblique_proj_diff_y():
@@ -2104,10 +2106,12 @@ def test_oblique_proj_random_state():
         dt_obliq_4.fit(X=[[3], [5], [8], [3], [5]], y=y_vals,
                 sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
         if True in np.not_equal(dt_obliq_3.tree_.impurity, dt_obliq_4.tree_.impurity):
-            assert_not_equal(dt_obliq_3.tree_.impurity, dt_obliq_4.tree_.impurity).any()
+            #assert_not_equal(dt_obliq_3.tree_.impurity, dt_obliq_4.tree_.impurity).any()
+            assert(True)
             break
         elif i==100:
-            assert_not_equal(dt_obliq_3.tree_.impurity, dt_obliq_4.tree_.impurity).any()
+            #assert_not_equal(dt_obliq_3.tree_.impurity, dt_obliq_4.tree_.impurity).any()
+            assert(False)
     
 
 def test_oblique_proj_same_y():
