@@ -2010,11 +2010,13 @@ def test_oblique_proj_diff_y():
         except:
             assert_allclose(dt_obliq_multi.tree_.impurity, [0.0, 0.0, 0.0], rtol=0.6)
     
-    dt_obliq = DecisionTreeRegressor(random_state=3, criterion="oblique",
-                                   max_leaf_nodes=2)
-    # Test MAE where a `sample_weight` is not explicitly provided.
+    
+def test_oblique_proj_no_weight():
+    # Test oblique where a `sample_weight` is not explicitly provided.
     # This is equivalent to providing uniform sample weights, though
     # the internal logic is different:
+    dt_obliq = DecisionTreeRegressor(random_state=3, criterion="oblique",
+                                   max_leaf_nodes=2)
     dt_obliq.fit(X=[[3], [5], [8], [3], [5]], y=[[3,3], [3,3], [4,4], [7,7], [8,8]])
     try:
         assert_allclose(dt_obliq.tree_.impurity, [22.0 / 5.0, 20.75 / 4.0, 0.0 / 1.0], rtol=0.6)
