@@ -2083,6 +2083,8 @@ def test_oblique_proj_random_state():
     # Test for the same result with same initial random state 
     dt_obliq = DecisionTreeRegressor(random_state=3, criterion="oblique",
                                    max_leaf_nodes=2)
+    dt_obliq.fit(X=[[3], [5], [8], [3], [5]], y=[[3,3], [3,3], [4,4], [7,7], [8,8]],
+                sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
     for i in range(30):                         
         dt_obliq_2 = DecisionTreeRegressor(random_state=3, criterion="oblique",
                                         max_leaf_nodes=2)
