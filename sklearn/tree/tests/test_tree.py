@@ -1957,11 +1957,11 @@ def test_axis_proj_random_state():
                                     max_leaf_nodes=2)
         dt_axis_4.fit(X=[[3], [5], [8], [3], [5]], y=y_vals,
                 sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
-        if False in np.not_equal(dt_axis_3.tree_.impurity, dt_axis_4.tree_.impurity):
-            assert_not_equal(dt_axis_3.tree_.impurity, dt_axis_4.tree_.impurity)
+        if True in np.not_equal(dt_axis_3.tree_.impurity, dt_axis_4.tree_.impurity):
+            assert_not_equal(dt_axis_3.tree_.impurity, dt_axis_4.tree_.impurity).any()
             break
         elif i==100:
-            assert_not_equal(dt_axis_3.tree_.impurity, dt_axis_4.tree_.impurity)
+            assert_not_equal(dt_axis_3.tree_.impurity, dt_axis_4.tree_.impurity).any()
     
 
 def test_oblique_proj_diff_y():
@@ -2020,10 +2020,19 @@ def test_oblique_proj_diff_y():
     try:
         assert_allclose(dt_obliq_multi.tree_.impurity, [6.148 / 2.3, 4.818 / 2.3, 0.0], rtol=0.6)
     except:
-        try:
-            assert_allclose(dt_obliq_multi.tree_.impurity, [2*6.148 / 2.3, 2*4.818 / 2.3, 0.0], rtol=0.6)
+        try: 
+            assert_allclose(dt_obliq.tree_.impurity, [7.7 / 2.3, 6.13125 / 1.3, 0.0 / 1.0], rtol=0.6)
         except:
-            assert_allclose(dt_obliq_multi.tree_.impurity, [0.0, 0.0, 0.0], rtol=0.6)
+            try:
+                assert_allclose(dt_obliq.tree_.impurity, [(7.7 + 6.148) / 2.3, (6.13125 + 4.818) / 1.3, 0.0 / 1.0], rtol=0.6)
+            except:
+                try:
+                    assert_allclose(dt_obliq.tree_.impurity, [(7.7 - 6.148) / 2.3, (6.13125 - 4.818) / 1.3, 0.0 / 1.0], rtol=0.6)
+                except:
+                    try:
+                        assert_allclose(dt_obliq.tree_.impurity, [(-7.7 + 6.148) / 2.3, (-6.13125 + 4.818) / 1.3, 0.0 / 1.0], rtol=0.6)
+                    except:
+                        assert_allclose(dt_obliq_multi.tree_.impurity, [0.0, 0.0, 0.0], rtol=0.6)
     
     
 def test_oblique_proj_no_weight():
@@ -2092,11 +2101,11 @@ def test_oblique_proj_random_state():
                                     max_leaf_nodes=2)
         dt_obliq_4.fit(X=[[3], [5], [8], [3], [5]], y=y_vals,
                 sample_weight=[0.1, 0.3, 1.0, 0.6, 0.3])
-        if False in np.not_equal(dt_obliq_3.tree_.impurity, dt_obliq_4.tree_.impurity):
-            assert_not_equal(dt_obliq_3.tree_.impurity, dt_obliq_4.tree_.impurity)
+        if True in np.not_equal(dt_obliq_3.tree_.impurity, dt_obliq_4.tree_.impurity):
+            assert_not_equal(dt_obliq_3.tree_.impurity, dt_obliq_4.tree_.impurity).any()
             break
         elif i==100:
-            assert_not_equal(dt_obliq_3.tree_.impurity, dt_obliq_4.tree_.impurity)
+            assert_not_equal(dt_obliq_3.tree_.impurity, dt_obliq_4.tree_.impurity).any()
     
 
 def test_oblique_proj_same_y():
