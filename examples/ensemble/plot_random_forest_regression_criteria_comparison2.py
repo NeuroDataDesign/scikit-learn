@@ -31,7 +31,7 @@ from sklearn.datasets import (
     make_sin_regression,
     make_square_regression,
 )
-from sklearn.dummy import DummyRegressor
+
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 
@@ -52,14 +52,14 @@ simulations = {
 ###############################################################################
 def _train_forest(X, y, criterion):
     """Fit a RandomForestRegressor with default parameters and specific criterion."""
-    if criterion == "dummy":
-        regr = DummyRegressor(strategy="mean")
-        regr.fit(X, y)
-    else:
-        regr = RandomForestRegressor(
-            n_estimators=500, criterion=criterion, max_features="sqrt", max_depth=5
-        )
-        regr.fit(X, y)
+    regr = RandomForestRegressor(
+        n_estimators=500, criterion=criterion, max_features="sqrt", max_depth=5
+    )
+    regr.fit(X, y)
+
+
+
+
     return regr
 
 
@@ -99,7 +99,7 @@ def _prep_data(sim_dict, simulation_name, max_n_samples, n_dimensions, n_trials)
             np.copy(X_test),
             np.copy(y_test),
         )
-        
+    #print("Xtrain: ", sim_dict[simulation_name][0][0].shape), print("ytrain: ", sim_dict[simulation_name][0][1].shape), print("Xtest: ", sim_dict[simulation_name][0][2].shape), print("Xtest: ", sim_dict[simulation_name][0][3].shape)
     return sim_dict
 
 
@@ -177,7 +177,7 @@ print("Constructing parameter space...")
 n_dimensions = 10
 simulation_names = simulations.keys()
 sample_sizes = np.arange(5, 51, 3)
-criteria = ["mae", "mse", "friedman_mse", "axis", "oblique", "dummy"]
+criteria = ["mae", "mse", "friedman_mse", "axis", "oblique"]
 
 # Number of times to repeat each simulation setting
 n_repeats = 30
@@ -220,8 +220,7 @@ data = Parallel(n_jobs=-2)(
 # Save results as a DataFrame
 columns = ["simulation", "n_samples", "criterion", "n_dimensions", "mse", "runtime"]
 df = pd.DataFrame(data, columns=columns)
-df.head()
-df.to_csv("~/Desktop/sim.csv")
+df.to_csv('nonlinearSims.csv')
 
 # Plot the results
 sns.relplot(
@@ -234,4 +233,19 @@ sns.relplot(
     facet_kws={"sharey": False, "sharex": True},
 )
 plt.tight_layout()
+plt.savefig("splitter_comparison_mse_04_06.png")
+plt.show()
+
+# Plot the results
+sns.relplot(
+    x="n_samples",
+    y="runtime",
+    hue="criterion",
+    col="simulation",
+    kind="line",
+    data=df,
+    facet_kws={"sharey": False, "sharex": True},
+)
+plt.tight_layout()
+plt.savefig("splitter_comparison_runtime_04_06.png")
 plt.show()

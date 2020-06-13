@@ -23,6 +23,7 @@ parameter.
 # License: BSD 3 clause
 
 import matplotlib.pyplot as plt
+#import pandas as pd
 
 from sklearn.datasets import (make_independent_noise, make_log_regression,
                               make_multiplicative_noise, make_sin_regression,
@@ -40,9 +41,25 @@ def plot_simulation(simulation_name, ax):
     if noise is not None:
         X_pure, y_pure = sim(n_samples=1000, n_dimensions=1, noise=0)
         X_noise, y_noise = sim(n_samples=100, n_dimensions=1, noise=noise)
+        '''
+        df = pd.DataFrame(X_pure)
+        df.to_csv('nonlinearSimsDataXpure' + simulation_name + '.csv')
+        df = pd.DataFrame(y_pure)
+        df.to_csv('nonlinearSimsDataypure' + simulation_name + '.csv')
+        df = pd.DataFrame(X_noise)
+        df.to_csv('nonlinearSimsDataXnoise' + simulation_name + '.csv')
+        df = pd.DataFrame(y_noise)
+        df.to_csv('nonlinearSimsDataynoise' + simulation_name + '.csv')
+        '''
     else:
         X_pure, y_pure = sim(n_samples=1000, n_dimensions=1)
-
+        '''
+        df = pd.DataFrame(X_pure)
+        df.to_csv('nonlinearSimsDataXpure' + simulation_name + '.csv')
+        df = pd.DataFrame(y_pure)
+        df.to_csv('nonlinearSimsDataypure' + simulation_name + '.csv')
+        '''
+    
     # Plot the noiseless and noisy data sets
     ax.scatter(X_pure, y_pure, s=10, c="#17202A")
     if noise is not None:
@@ -61,10 +78,12 @@ simulations = {
     "Independence": (make_independent_noise, None),
 }
 
+plt.rcParams.update({'font.size': 18})
 _, axs = plt.subplots(1, 5, figsize=(40, 4))
 plt.subplots_adjust(bottom=.15)
 
 for simulation_name, ax in zip(simulations.keys(), axs):
     plot_simulation(simulation_name, ax)
 
+plt.savefig("SimDataPlots5_14.png")
 plt.show()
